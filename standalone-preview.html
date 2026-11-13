@@ -58,7 +58,7 @@
     const { useState, useEffect } = React;
 
     // ==========================================
-    // TRANSLATIONS DICTIONARY (EN, RU, LV)
+    // COMPLETE MULTI-LANGUAGE DICTIONARY
     // ==========================================
     const translations = {
       en: {
@@ -97,6 +97,10 @@
             fileAuth: 'auth_service.py',
             fileDb: 'database_queries.go',
             fileWebhook: 'webhook_dispatch.ts',
+            fileDbStatus: 'Clean',
+            fileWebhookStatus: 'Clean',
+            cleanFileHeading: 'No Security Vulnerabilities Detected',
+            cleanFileDesc: 'CodePulse analyzed this file using full semantic taint analysis. All inputs are properly sanitized.',
             diffTab: 'Diff & AI Fix',
             astTab: 'AST Taint Flow',
             unverifiedCommit: 'Unverified author commit',
@@ -208,6 +212,7 @@
           badge: 'Simple & Transparent Flow',
           title: 'How CodePulse Protects Your Codebase',
           subtitle: 'From branch creation to production deploy in 4 automated steps.',
+          stepLabel: 'STEP',
           steps: [
             {
               number: '01',
@@ -256,6 +261,8 @@
           yearly: 'Yearly',
           discountBadge: '20% OFF',
           saveYearly: 'Save $120/year per developer',
+          perDevMonth: '/ dev / month',
+          freePeriod: '/ forever',
           developer: {
             name: 'Developer',
             badge: 'Free Forever',
@@ -369,6 +376,7 @@
           messagePlaceholder: 'Tell us about your team size, tech stack, and goals...',
           consentText: 'I agree to the processing of personal data in accordance with the ',
           consentLink: 'Privacy Policy',
+          consentError: 'Please agree to personal data processing before submitting',
           submitBtn: 'Send Message',
           sendingBtn: 'Sending...',
           successTitle: 'Message Received!',
@@ -390,15 +398,16 @@
           submitBtn: 'Create Account & Start Free',
           hasAccount: 'Already have an account?',
           signInLink: 'Sign In',
-          termsNote: 'By continuing, you agree to our Terms of Service and Privacy Policy. Zero-Data Retention guaranteed.'
+          termsNote: 'By continuing, you agree to our Terms of Service and Privacy Policy. Zero-Data Retention guaranteed.',
+          successTitle: 'Welcome to CodePulse!',
+          successDesc: 'Account created successfully. 14-day Pro trial is active.',
+          goToDashboard: 'Go to Dashboard →'
         },
         footer: {
           bio: 'Autonomous platform for code review, vulnerability detection, and automated patch generation in Git Pull Requests.',
           statusNormal: 'All systems operational',
           uptime: '99.99% Uptime',
-          colProduct: 'Product',
-          colIntegrations: 'Integrations',
-          colSecurity: 'Security',
+          contactBtn: 'Contact Sales',
           copyright: 'CodePulse Inc. All rights reserved. Built for modern DevSecOps teams.',
           privacy: 'Privacy Policy',
           terms: 'Terms of Service',
@@ -442,6 +451,10 @@
             fileAuth: 'auth_service.py',
             fileDb: 'database_queries.go',
             fileWebhook: 'webhook_dispatch.ts',
+            fileDbStatus: 'Чисто',
+            fileWebhookStatus: 'Чисто',
+            cleanFileHeading: 'Уязвимостей не обнаружено',
+            cleanFileDesc: 'CodePulse выполнил полный семантический анализ потока данных. Все входные параметры корректно санитизированы.',
             diffTab: 'Diff & AI Fix',
             astTab: 'AST Taint Flow',
             unverifiedCommit: 'Непроверенный коммит автора',
@@ -553,6 +566,7 @@
           badge: 'Простой и прозрачный флоу',
           title: 'Как CodePulse защищает ваш код',
           subtitle: 'От создания ветки до безопасного деплоя в продакшн за 4 автоматических шага.',
+          stepLabel: 'ШАГ',
           steps: [
             {
               number: '01',
@@ -601,6 +615,8 @@
           yearly: 'Ежегодно',
           discountBadge: 'Скидка 20%',
           saveYearly: 'Экономия $120 в год на каждого разработчика',
+          perDevMonth: '/ разраб / мес',
+          freePeriod: '/ навсегда',
           developer: {
             name: 'Developer',
             badge: 'Бесплатно навсегда',
@@ -713,6 +729,7 @@
           messagePlaceholder: 'Расскажите о размере команды, технологическом стеке и задачах...',
           consentText: 'Я даю согласие на обработку персональных данных в соответствии с ',
           consentLink: 'Политикой конфиденциальности',
+          consentError: 'Пожалуйста, дайте согласие на обработку персональных данных',
           submitBtn: 'Отправить сообщение',
           sendingBtn: 'Отправка...',
           successTitle: 'Сообщение успешно отправлено!',
@@ -734,15 +751,16 @@
           submitBtn: 'Создать аккаунт и начать бесплатно',
           hasAccount: 'Уже есть аккаунт?',
           signInLink: 'Войти',
-          termsNote: 'Продолжая, вы соглашаетесь с Условиями обслуживания и Политикой Zero-Data Retention.'
+          termsNote: 'Продолжая, вы соглашаетесь с Условиями обслуживания и Политикой Zero-Data Retention.',
+          successTitle: 'Добро пожаловать в CodePulse!',
+          successDesc: 'Аккаунт успешно создан. Включаем 14 дней тарифа Pro и готовим интеграцию с Git.',
+          goToDashboard: 'Перейти в панель управления →'
         },
         footer: {
           bio: 'Автономная платформа для ревью кода, поиска логических уязвимостей и автоматического создания проверенных патчей в Pull Request.',
           statusNormal: 'Все системы работают штатно',
           uptime: '99.99% Uptime',
-          colProduct: 'Продукт',
-          colIntegrations: 'Интеграции',
-          colSecurity: 'Безопасность',
+          contactBtn: 'Связаться с отделом продаж',
           copyright: 'CodePulse Inc. Все права защищены. Разработано для современных DevSecOps команд.',
           privacy: 'Политика конфиденциальности',
           terms: 'Условия использования',
@@ -786,6 +804,10 @@
             fileAuth: 'auth_service.py',
             fileDb: 'database_queries.go',
             fileWebhook: 'webhook_dispatch.ts',
+            fileDbStatus: 'Tīrs',
+            fileWebhookStatus: 'Tīrs',
+            cleanFileHeading: 'Ievainojamības nav atklātas',
+            cleanFileDesc: 'CodePulse veica pilnu semantisko datu plūsmas analīzi. Visi ieejas dati ir pareizi sanitizēti.',
             diffTab: 'Diff & AI Labojums',
             astTab: 'AST Taint Plūsma',
             unverifiedCommit: 'Autora nepārbaudīts komits',
@@ -897,6 +919,7 @@
           badge: 'Vienkārša un caurspīdīga darbplūsma',
           title: 'Kā CodePulse aizsargā jūsu kodu',
           subtitle: 'No zara izveides līdz drošai izvietošanai produkcijā 4 automatizētos soļos.',
+          stepLabel: 'SOLIS',
           steps: [
             {
               number: '01',
@@ -945,6 +968,8 @@
           yearly: 'Gadā',
           discountBadge: '20% ATLAIDE',
           saveYearly: 'Ietaupiet $120/gadā par katru izstrādātāju',
+          perDevMonth: '/ izstrādātājs / mēn',
+          freePeriod: '/ uz visiem laikiem',
           developer: {
             name: 'Developer',
             badge: 'Bezmaksas uz visiem laikiem',
@@ -1058,6 +1083,7 @@
           messagePlaceholder: 'Pastāstiet par savu komandu, tehnoloģiju steku un mērķiem...',
           consentText: 'Es piekrītu personas datu apstrādei saskaņā ar ',
           consentLink: 'Privātuma politiku',
+          consentError: 'Lūdzu, apstipriniet piekrišanu personas datu apstrādei',
           submitBtn: 'Nosūtīt ziņu',
           sendingBtn: 'Nosūta...',
           successTitle: 'Ziņa veiksmīgi nosūtīta!',
@@ -1079,15 +1105,16 @@
           submitBtn: 'Izveidot kontu un sākt bez maksas',
           hasAccount: 'Jau ir konts?',
           signInLink: 'Pieslēgties',
-          termsNote: 'Turpinot, jūs piekrītat mūsu Pakalpojumu sniegšanas noteikumiem un Zero-Data Retention politikai.'
+          termsNote: 'Turpinot, jūs piekrītat mūsu Pakalpojumu sniegšanas noteikumiem un Zero-Data Retention politikai.',
+          successTitle: 'Laipni lūdzam CodePulse!',
+          successDesc: 'Konts veiksmīgi izveidots. 14 dienu Pro izmēģinājums ir aktīvs.',
+          goToDashboard: 'Doties uz paneli →'
         },
         footer: {
           bio: 'Autonoma platforma koda pārskatīšanai, ievainojamību meklēšanai un automātiskai labojumu ģenerēšanai Git Pull Requestos.',
           statusNormal: 'Visas sistēmas darbojas nevainojami',
           uptime: '99.99% Uptime',
-          colProduct: 'Produkts',
-          colIntegrations: 'Integrācijas',
-          colSecurity: 'Drošība',
+          contactBtn: 'Sazināties ar pārdošanu',
           copyright: 'CodePulse Inc. Visas tiesības aizsargātas. Izstrādāts modernām DevSecOps komandām.',
           privacy: 'Privātuma politika',
           terms: 'Lietošanas noteikumi',
@@ -1161,7 +1188,7 @@
                   <a
                     key={link.name}
                     href={link.href}
-                    className="px-3.5 py-1.5 text-xs lg:text-sm font-medium text-slate-300 hover:text-white rounded-full hover:bg-white/5 transition-colors"
+                    className="px-3 py-1.5 text-xs lg:text-sm font-medium text-slate-300 hover:text-white rounded-full hover:bg-white/5 transition-colors"
                   >
                     {link.name}
                   </a>
@@ -1237,7 +1264,6 @@
 
               {/* Mobile button */}
               <div className="sm:hidden flex items-center gap-2">
-                {/* Mobile Lang Button */}
                 <button
                   onClick={() => {
                     const next = lang === 'en' ? 'ru' : lang === 'ru' ? 'lv' : 'en';
@@ -1301,6 +1327,7 @@
     function Hero({ t, onOpenAuth }) {
       const [email, setEmail] = useState('');
       const [subscribed, setSubscribed] = useState(false);
+      const [activeFile, setActiveFile] = useState('auth_service.py');
       const [activeTab, setActiveTab] = useState('diff');
       const [isPatchApplied, setIsPatchApplied] = useState(false);
       const [isFixing, setIsFixing] = useState(false);
@@ -1429,7 +1456,7 @@
                   {/* Status score badge */}
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium border bg-slate-950">
-                      {isPatchApplied ? (
+                      {isPatchApplied || activeFile !== 'auth_service.py' ? (
                         <span className="flex items-center gap-1.5 text-emerald-400 border-emerald-500/30">
                           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                           {t.mockup.statusSecure}
@@ -1451,17 +1478,38 @@
                 {/* Subtoolbar */}
                 <div className="px-4 py-2 bg-slate-900/60 border-b border-white/5 flex flex-wrap items-center justify-between gap-2 text-xs">
                   <div className="flex items-center gap-1.5">
-                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 font-semibold">
+                    <button
+                      onClick={() => setActiveFile('auth_service.py')}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs transition-colors ${activeFile === 'auth_service.py' ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 font-semibold' : 'text-slate-400 hover:text-white'}`}
+                    >
                       <Icon name="file-code" size={14} className="text-indigo-400" />
                       {t.mockup.fileAuth}
                       <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${isPatchApplied ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}`}>
                         {isPatchApplied ? '✓' : '!'}
                       </span>
-                    </span>
-                    <span className="text-slate-400 hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs">
+                    </button>
+
+                    <button
+                      onClick={() => setActiveFile('database_queries.go')}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs transition-colors ${activeFile === 'database_queries.go' ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 font-semibold' : 'text-slate-400 hover:text-white'}`}
+                    >
                       <Icon name="file-code" size={14} />
                       {t.mockup.fileDb}
-                    </span>
+                      <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-1 py-0.2 rounded font-bold">
+                        {t.mockup.fileDbStatus || 'Clean'}
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => setActiveFile('webhook_dispatch.ts')}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs transition-colors ${activeFile === 'webhook_dispatch.ts' ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 font-semibold' : 'text-slate-400 hover:text-white'}`}
+                    >
+                      <Icon name="file-code" size={14} />
+                      {t.mockup.fileWebhook}
+                      <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-1 py-0.2 rounded font-bold">
+                        {t.mockup.fileWebhookStatus || 'Clean'}
+                      </span>
+                    </button>
                   </div>
 
                   <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-white/5">
@@ -1483,149 +1531,209 @@
                 {/* Code Body */}
                 <div className="p-4 sm:p-6 bg-slate-950/70 font-mono text-xs sm:text-[13px] leading-relaxed overflow-x-auto min-h-[350px]">
                   {activeTab === 'diff' ? (
-                    <div className="space-y-1">
-                      <div className="text-slate-500 text-xs pb-3 font-mono border-b border-slate-800/80 mb-3 flex items-center justify-between">
-                        <span>@@ -42,12 +42,15 @@ def verify_session_token(token: str, secret_key: str):</span>
-                        <span className="text-slate-400 font-sans text-xs">
-                          {isPatchApplied ? t.mockup.aiPatchApplied : t.mockup.unverifiedCommit}
-                        </span>
-                      </div>
-
-                      <div className="flex items-start gap-3 text-slate-400 py-0.5">
-                        <span className="w-8 text-right text-slate-600 select-none">42</span>
-                        <span className="text-purple-400">import</span> <span className="text-slate-200">jwt, hmac, hashlib</span>
-                      </div>
-                      <div className="flex items-start gap-3 text-slate-400 py-0.5">
-                        <span className="w-8 text-right text-slate-600 select-none">43</span>
-                        <span className="text-blue-400">def</span> <span className="text-amber-300">verify_session_token</span><span className="text-slate-300">(token: str, secret_key: str):</span>
-                      </div>
-
-                      {!isPatchApplied ? (
-                        <div>
-                          {/* Vulnerable line */}
-                          <div className="flex items-start gap-3 bg-rose-950/40 border-l-2 border-rose-500 text-rose-200 py-1.5 px-1 -mx-1 rounded-r">
-                            <span className="w-8 text-right text-rose-400 select-none font-bold">44</span>
-                            <span className="text-rose-400 font-bold">-</span>
-                            <span className="font-semibold">
-                              payload = jwt.decode(token, options={'{'}<span className="text-rose-300">"verify_signature": False</span>{'}'})
+                    <div>
+                      {activeFile === 'auth_service.py' ? (
+                        <div className="space-y-1">
+                          <div className="text-slate-500 text-xs pb-3 font-mono border-b border-slate-800/80 mb-3 flex items-center justify-between">
+                            <span>@@ -42,12 +42,15 @@ def verify_session_token(token: str, secret_key: str):</span>
+                            <span className="text-slate-400 font-sans text-xs">
+                              {isPatchApplied ? t.mockup.aiPatchApplied : t.mockup.unverifiedCommit}
                             </span>
                           </div>
 
-                          {/* AI Alert Card */}
-                          <div className="my-3 p-3.5 sm:p-4 rounded-xl bg-slate-900 border border-rose-500/40 shadow-xl font-sans">
-                            <div className="flex items-start gap-3">
-                              <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 shrink-0">
-                                <Icon name="alert-triangle" size={20} />
-                              </div>
-                              <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className="text-xs font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 uppercase">
-                                    {t.mockup.alertBadge}
-                                  </span>
-                                </div>
-                                <h4 className="text-sm font-semibold text-white mb-1">
-                                  {t.mockup.alertTitle}
-                                </h4>
-                                <p className="text-xs text-slate-300 mb-3 max-w-2xl">
-                                  {t.mockup.alertDesc}
-                                </p>
-                                
-                                <div className="flex flex-wrap items-center gap-2.5">
-                                  <button
-                                    onClick={handleApplyFix}
-                                    disabled={isFixing}
-                                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white text-xs font-semibold flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                                  >
-                                    {isFixing ? (
-                                      <span>{t.mockup.applyingFix}</span>
-                                    ) : (
-                                      <>
-                                        <Icon name="sparkles" size={14} className="text-white" />
-                                        <span>{t.mockup.applyFixBtn}</span>
-                                      </>
-                                    )}
-                                  </button>
-                                  <span className="text-[11px] text-slate-400 italic">
-                                    {t.mockup.clickHint}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
+                          <div className="flex items-start gap-3 text-slate-400 py-0.5">
+                            <span className="w-8 text-right text-slate-600 select-none">42</span>
+                            <span className="text-purple-400">import</span> <span className="text-slate-200">jwt, hmac, hashlib</span>
+                          </div>
+                          <div className="flex items-start gap-3 text-slate-400 py-0.5">
+                            <span className="w-8 text-right text-slate-600 select-none">43</span>
+                            <span className="text-blue-400">def</span> <span className="text-amber-300">verify_session_token</span><span className="text-slate-300">(token: str, secret_key: str):</span>
                           </div>
 
-                          <div className="flex items-start gap-3 text-slate-400 py-0.5">
-                            <span className="w-8 text-right text-slate-600 select-none">45</span>
-                            <span className="text-purple-400">return</span> <span className="text-slate-200">payload.get("user_id")</span>
+                          {!isPatchApplied ? (
+                            <div>
+                              <div className="flex items-start gap-3 bg-rose-950/40 border-l-2 border-rose-500 text-rose-200 py-1.5 px-1 -mx-1 rounded-r">
+                                <span className="w-8 text-right text-rose-400 select-none font-bold">44</span>
+                                <span className="text-rose-400 font-bold">-</span>
+                                <span className="font-semibold">
+                                  payload = jwt.decode(token, options={'{'}<span className="text-rose-300">"verify_signature": False</span>{'}'})
+                                </span>
+                              </div>
+
+                              {/* AI Alert Card */}
+                              <div className="my-3 p-3.5 sm:p-4 rounded-xl bg-slate-900 border border-rose-500/40 shadow-xl font-sans">
+                                <div className="flex items-start gap-3">
+                                  <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 shrink-0">
+                                    <Icon name="alert-triangle" size={20} />
+                                  </div>
+                                  <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 uppercase">
+                                        {t.mockup.alertBadge}
+                                      </span>
+                                    </div>
+                                    <h4 className="text-sm font-semibold text-white mb-1">
+                                      {t.mockup.alertTitle}
+                                    </h4>
+                                    <p className="text-xs text-slate-300 mb-3 max-w-2xl">
+                                      {t.mockup.alertDesc}
+                                    </p>
+                                    
+                                    <div className="flex flex-wrap items-center gap-2.5">
+                                      <button
+                                        onClick={handleApplyFix}
+                                        disabled={isFixing}
+                                        className="px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white text-xs font-semibold flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                      >
+                                        {isFixing ? (
+                                          <span>{t.mockup.applyingFix}</span>
+                                        ) : (
+                                          <>
+                                            <Icon name="sparkles" size={14} className="text-white" />
+                                            <span>{t.mockup.applyFixBtn}</span>
+                                          </>
+                                        )}
+                                      </button>
+                                      <span className="text-[11px] text-slate-400 italic">
+                                        {t.mockup.clickHint}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex items-start gap-3 text-slate-400 py-0.5">
+                                <span className="w-8 text-right text-slate-600 select-none">45</span>
+                                <span className="text-purple-400">return</span> <span className="text-slate-200">payload.get("user_id")</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div>
+                              <div className="space-y-1">
+                                <div className="flex items-start gap-3 bg-emerald-950/40 border-l-2 border-emerald-400 text-emerald-200 py-1 px-1 -mx-1 rounded-r">
+                                  <span className="w-8 text-right text-emerald-400 select-none font-bold">44</span>
+                                  <span className="text-emerald-400 font-bold">+</span>
+                                  <span className="font-semibold text-emerald-300">
+                                    # CodePulse Patch [SEC-AUTO-482]: HS256 enforcement & timestamp verification
+                                  </span>
+                                </div>
+                                <div className="flex items-start gap-3 bg-emerald-950/40 border-l-2 border-emerald-400 text-emerald-200 py-1 px-1 -mx-1 rounded-r">
+                                  <span className="w-8 text-right text-emerald-400 select-none font-bold">45</span>
+                                  <span className="text-emerald-400 select-none font-bold">+</span>
+                                  <span className="font-semibold">
+                                    payload = jwt.decode(token, secret_key, algorithms=[<span className="text-amber-300">"HS256"</span>], options={'{'}<span className="text-emerald-300">"require": ["exp", "sub"]</span>{'}'})
+                                  </span>
+                                </div>
+                                <div className="flex items-start gap-3 bg-emerald-950/40 border-l-2 border-emerald-400 text-emerald-200 py-1 px-1 -mx-1 rounded-r">
+                                  <span className="w-8 text-right text-emerald-400 select-none font-bold">46</span>
+                                  <span className="text-emerald-400 select-none font-bold">+</span>
+                                  <span className="font-semibold">
+                                    <span className="text-purple-400">if not</span> hmac.compare_digest(payload.get(<span className="text-amber-300">"issuer"</span>, <span className="text-amber-300">""</span>), <span className="text-amber-300">"codepulse.auth"</span>):
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="my-3 p-3.5 sm:p-4 rounded-xl bg-slate-900 border border-emerald-500/40 shadow-xl font-sans">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                  <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shrink-0">
+                                      <Icon name="check-circle-2" size={20} />
+                                    </div>
+                                    <div>
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-xs font-bold text-emerald-400 uppercase">
+                                          {t.mockup.patchVerified}
+                                        </span>
+                                        <span className="text-xs text-slate-400 font-mono">{t.mockup.testsGenerated}</span>
+                                      </div>
+                                      <p className="text-xs text-slate-300">
+                                        {t.mockup.patchDesc}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={handleResetFix}
+                                      className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1.5 transition-colors"
+                                    >
+                                      <Icon name="rotate-ccw" size={14} />
+                                      <span>{t.mockup.resetBtn}</span>
+                                    </button>
+                                    <span className="px-3 py-1.5 rounded-lg bg-emerald-600/20 border border-emerald-500/30 text-emerald-300 text-xs font-semibold">
+                                      {t.mockup.prApproved}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex items-start gap-3 text-slate-400 py-0.5">
+                                <span className="w-8 text-right text-slate-600 select-none">47</span>
+                                <span className="text-purple-400">return</span> <span className="text-slate-200">payload.get("sub")</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : activeFile === 'database_queries.go' ? (
+                        <div className="space-y-1">
+                          <div className="text-slate-500 text-xs pb-3 font-mono border-b border-slate-800/80 mb-3 flex items-center justify-between">
+                            <span>@@ -18,10 +18,10 @@ func GetUserByID(...)</span>
+                            <span className="text-emerald-400 font-sans text-xs">✓ {t.mockup.fileDbStatus}</span>
+                          </div>
+                          <div className="text-slate-400 py-0.5">
+                            <span className="w-8 inline-block text-right text-slate-600 mr-3 select-none">18</span>
+                            <span className="text-blue-400">package</span> <span className="text-slate-200">db</span>
+                          </div>
+                          <div className="text-slate-400 py-0.5">
+                            <span className="w-8 inline-block text-right text-slate-600 mr-3 select-none">19</span>
+                            <span className="text-blue-400">func</span> <span className="text-amber-300">GetUserByID</span>(ctx context.Context, db *sql.DB, id string) (*User, error) &#123;
+                          </div>
+                          <div className="text-emerald-300 bg-emerald-950/30 py-1 px-1 -mx-1 rounded">
+                            <span className="w-8 inline-block text-right text-emerald-400/80 mr-3 select-none">20</span>
+                            <span>    row := db.QueryRowContext(ctx, <span className="text-amber-300">"SELECT id, email, role FROM users WHERE id = $1"</span>, id)</span>
+                          </div>
+                          <div className="text-slate-400 py-0.5">
+                            <span className="w-8 inline-block text-right text-slate-600 mr-3 select-none">21</span>
+                            <span>    <span className="text-purple-400">return</span> scanUser(row)</span>
+                          </div>
+                          <div className="mt-4 p-4 rounded-xl bg-slate-900 border border-emerald-500/30 text-xs font-sans">
+                            <div className="flex items-center gap-2 text-emerald-400 font-semibold mb-1">
+                              <Icon name="check-circle-2" size={16} />
+                              <span>{t.mockup.cleanFileHeading}</span>
+                            </div>
+                            <p className="text-slate-300 text-xs">{t.mockup.cleanFileDesc}</p>
                           </div>
                         </div>
                       ) : (
-                        <div>
-                          {/* Green Fixed Lines */}
-                          <div className="space-y-1">
-                            <div className="flex items-start gap-3 bg-emerald-950/40 border-l-2 border-emerald-400 text-emerald-200 py-1 px-1 -mx-1 rounded-r">
-                              <span className="w-8 text-right text-emerald-400 select-none font-bold">44</span>
-                              <span className="text-emerald-400 font-bold">+</span>
-                              <span className="font-semibold text-emerald-300">
-                                # CodePulse Patch [SEC-AUTO-482]: HS256 enforcement & timestamp verification
-                              </span>
-                            </div>
-                            <div className="flex items-start gap-3 bg-emerald-950/40 border-l-2 border-emerald-400 text-emerald-200 py-1 px-1 -mx-1 rounded-r">
-                              <span className="w-8 text-right text-emerald-400 select-none font-bold">45</span>
-                              <span className="text-emerald-400 select-none font-bold">+</span>
-                              <span className="font-semibold">
-                                payload = jwt.decode(token, secret_key, algorithms=[<span className="text-amber-300">"HS256"</span>], options={'{'}<span className="text-emerald-300">"require": ["exp", "sub"]</span>{'}'})
-                              </span>
-                            </div>
-                            <div className="flex items-start gap-3 bg-emerald-950/40 border-l-2 border-emerald-400 text-emerald-200 py-1 px-1 -mx-1 rounded-r">
-                              <span className="w-8 text-right text-emerald-400 select-none font-bold">46</span>
-                              <span className="text-emerald-400 select-none font-bold">+</span>
-                              <span className="font-semibold">
-                                <span className="text-purple-400">if not</span> hmac.compare_digest(payload.get(<span className="text-amber-300">"issuer"</span>, <span className="text-amber-300">""</span>), <span className="text-amber-300">"codepulse.auth"</span>):
-                              </span>
-                            </div>
+                        <div className="space-y-1">
+                          <div className="text-slate-500 text-xs pb-3 font-mono border-b border-slate-800/80 mb-3 flex items-center justify-between">
+                            <span>@@ -12,8 +12,8 @@ export async function dispatchWebhook(...)</span>
+                            <span className="text-emerald-400 font-sans text-xs">✓ {t.mockup.fileWebhookStatus}</span>
                           </div>
-
-                          {/* Success Card */}
-                          <div className="my-3 p-3.5 sm:p-4 rounded-xl bg-slate-900 border border-emerald-500/40 shadow-xl font-sans">
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shrink-0">
-                                  <Icon name="check-circle-2" size={20} />
-                                </div>
-                                <div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs font-bold text-emerald-400 uppercase">
-                                      {t.mockup.patchVerified}
-                                    </span>
-                                    <span className="text-xs text-slate-400 font-mono">{t.mockup.testsGenerated}</span>
-                                  </div>
-                                  <p className="text-xs text-slate-300">
-                                    {t.mockup.patchDesc}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <button
-                                  onClick={handleResetFix}
-                                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1.5 transition-colors"
-                                >
-                                  <Icon name="rotate-ccw" size={14} />
-                                  <span>{t.mockup.resetBtn}</span>
-                                </button>
-                                <span className="px-3 py-1.5 rounded-lg bg-emerald-600/20 border border-emerald-500/30 text-emerald-300 text-xs font-semibold">
-                                  {t.mockup.prApproved}
-                                </span>
-                              </div>
-                            </div>
+                          <div className="text-slate-400 py-0.5">
+                            <span className="w-8 inline-block text-right text-slate-600 mr-3 select-none">12</span>
+                            <span className="text-purple-400">import</span> &#123; validateAllowlist &#125; <span className="text-purple-400">from</span> <span className="text-emerald-300">'./security/ssrf'</span>;
                           </div>
-
-                          <div className="flex items-start gap-3 text-slate-400 py-0.5">
-                            <span className="w-8 text-right text-slate-600 select-none">47</span>
-                            <span className="text-purple-400">return</span> <span className="text-slate-200">payload.get("sub")</span>
+                          <div className="text-slate-400 py-0.5">
+                            <span className="w-8 inline-block text-right text-slate-600 mr-3 select-none">13</span>
+                            <span className="text-blue-400">export async function</span> <span className="text-amber-300">dispatchWebhook</span>(url: string, payload: unknown) &#123;
+                          </div>
+                          <div className="text-emerald-300 bg-emerald-950/30 py-1 px-1 -mx-1 rounded">
+                            <span className="w-8 inline-block text-right text-emerald-400/80 mr-3 select-none">14</span>
+                            <span>    <span className="text-blue-400">const</span> safeUrl = validateAllowlist(url); <span className="text-slate-500">// SSRF mitigation</span></span>
+                          </div>
+                          <div className="text-slate-400 py-0.5">
+                            <span className="w-8 inline-block text-right text-slate-600 mr-3 select-none">15</span>
+                            <span>    <span className="text-purple-400">return</span> fetch(safeUrl, &#123; method: <span className="text-amber-300">'POST'</span>, body: JSON.stringify(payload) &#125;);</span>
+                          </div>
+                          <div className="mt-4 p-4 rounded-xl bg-slate-900 border border-emerald-500/30 text-xs font-sans">
+                            <div className="flex items-center gap-2 text-emerald-400 font-semibold mb-1">
+                              <Icon name="check-circle-2" size={16} />
+                              <span>{t.mockup.cleanFileHeading}</span>
+                            </div>
+                            <p className="text-slate-300 text-xs">{t.mockup.cleanFileDesc}</p>
                           </div>
                         </div>
                       )}
-
                     </div>
                   ) : (
                     /* AST Taint Flow View */
@@ -1827,8 +1935,8 @@
                 </div>
 
                 <div className="flex items-center gap-4 text-xs text-slate-400 pt-2 border-t border-white/5">
-                  {t.card1.footer.map((tag) => (
-                    <span key={tag}>{tag}</span>
+                  {t.card1.footer.map((tag, idx) => (
+                    <span key={tag + idx}>{tag}</span>
                   ))}
                 </div>
               </div>
@@ -2055,7 +2163,7 @@
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 <div className="lg:col-span-7 space-y-4">
                   <div className="text-xs font-mono text-cyan-400 font-semibold uppercase">
-                    STEP {t.steps[activeStep].number} • {t.steps[activeStep].tag}
+                    {t.stepLabel || 'STEP'} {t.steps[activeStep].number} • {t.steps[activeStep].tag}
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-bold text-white">
                     {t.steps[activeStep].heading}
@@ -2186,7 +2294,7 @@
                               ${isAnnual ? tier.priceAnnual : tier.priceMonthly}
                             </span>
                             <span className="text-sm text-slate-400">
-                              {tier.priceMonthly === 0 ? '' : '/ dev / mo'}
+                              {tier.priceMonthly === 0 ? (t.freePeriod || '') : (t.perDevMonth || '/ dev / month')}
                             </span>
                           </div>
                         ) : (
@@ -2374,7 +2482,7 @@
                   onClick={onOpenContact}
                   className="px-3 py-1 rounded-full bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 hover:text-white text-xs font-medium"
                 >
-                  Contact
+                  {t.contactBtn || 'Contact Sales'}
                 </button>
               </div>
             </div>
@@ -2391,7 +2499,7 @@
       );
     }
 
-    // --- Contact Modal (with Personal Data Processing Consent Checkbox) ---
+    // --- Contact Modal ---
     function ContactModal({ isOpen, onClose, t }) {
       const [name, setName] = useState('');
       const [email, setEmail] = useState('');
@@ -2407,7 +2515,7 @@
       const handleSubmit = (e) => {
         e.preventDefault();
         if (!consent) {
-          setError('Please consent to personal data processing');
+          setError(t.consentError || 'Please consent to personal data processing');
           return;
         }
         setError('');
@@ -2508,7 +2616,7 @@
                     />
                   </div>
 
-                  {/* CONSENT CHECKBOX (DATA PROCESSING) */}
+                  {/* CONSENT CHECKBOX */}
                   <div className="pt-1">
                     <label className="flex items-start gap-3 cursor-pointer select-none">
                       <input
@@ -2565,7 +2673,7 @@
       );
     }
 
-    // --- Auth Modal (Triggered by "Start Free" / "Начать бесплатно") ---
+    // --- Auth Modal ---
     function AuthModal({ isOpen, onClose, t }) {
       const [email, setEmail] = useState('');
       const [password, setPassword] = useState('');
@@ -2703,15 +2811,15 @@
                 <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
                   <Icon name="check-circle-2" size={32} />
                 </div>
-                <h4 className="text-2xl font-bold text-white">Welcome to CodePulse!</h4>
+                <h4 className="text-2xl font-bold text-white">{t.successTitle || 'Welcome to CodePulse!'}</h4>
                 <p className="text-xs text-slate-300 max-w-xs mx-auto">
-                  Account created. 14 days of Pro trial activated.
+                  {t.successDesc || 'Account created successfully. 14-day Pro trial is active.'}
                 </p>
                 <button
                   onClick={handleClose}
                   className="px-6 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-500 text-white text-xs font-semibold shadow-lg"
                 >
-                  Go to Dashboard →
+                  {t.goToDashboard || 'Go to Dashboard →'}
                 </button>
               </div>
             )}
@@ -2722,7 +2830,7 @@
 
     // --- Main App Component ---
     function App() {
-      // Default to 'en' (English) as requested
+      // Default to 'en' (English)
       const [lang, setLang] = useState('en');
       const [isContactOpen, setIsContactOpen] = useState(false);
       const [isAuthOpen, setIsAuthOpen] = useState(false);
