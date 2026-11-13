@@ -166,9 +166,7 @@ npm run preview
 
 ---
 
-## 🧪 Verification & Quality Assurance
+## License
+**MIT**:
 
-- **Vite Build**: Compiled with `npm run build` (1939 modules transformed, 0 errors, production bundle generated in `dist/`).
-- **Translation Symmetry**: Verified via automated AST scanner (197/197 symmetric keys between `en`, `ru`, and `lv`).
-- **Modal Validation**: Verified consent checkbox enforcement in `ContactModal` and OAuth/Email flow in `AuthModal`.
-- **Standalone Parity**: `standalone-preview.html` verified with balanced bracket structure and identical feature parity.
+ 
