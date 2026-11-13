@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Translations](https://img.shields.io/badge/Translations-EN%20%7C%20RU%20%7C%20LV-emerald)](#-multi-language-support)
 
-> Developed strictly according to the **`saas-landing`** skill specification: High-conversion SaaS landing page featuring a modern developer-first dark tech aesthetic, asymmetrical Bento Grid, interactive Hero UI Mockup, multi-language switcher, contact modal with GDPR consent verification, and auth onboarding.
+>Developed strictly according to the **`saas-landing`** specification: a high-converting SaaS landing page with a modern, developer-focused dark tech aesthetic, an asymmetrical Bento Grid, an interactive Hero UI Mockup, a language switcher, a contact modal with GDPR-compliant consent check and registration authorization.
 
 ---
 
