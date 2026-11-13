@@ -36,6 +36,10 @@ export const translations = {
         fileAuth: 'auth_service.py',
         fileDb: 'database_queries.go',
         fileWebhook: 'webhook_dispatch.ts',
+        fileDbStatus: 'Clean',
+        fileWebhookStatus: 'Clean',
+        cleanFileHeading: 'No Security Vulnerabilities Detected',
+        cleanFileDesc: 'CodePulse analyzed this file using full semantic taint analysis. All inputs are properly sanitized.',
         diffTab: 'Diff & AI Fix',
         astTab: 'AST Taint Flow',
         unverifiedCommit: 'Unverified author commit',
@@ -147,6 +151,7 @@ export const translations = {
       badge: 'Simple & Transparent Flow',
       title: 'How CodePulse Protects Your Codebase',
       subtitle: 'From branch creation to production deploy in 4 automated steps.',
+      stepLabel: 'STEP',
       steps: [
         {
           number: '01',
@@ -195,6 +200,8 @@ export const translations = {
       yearly: 'Yearly',
       discountBadge: '20% OFF',
       saveYearly: 'Save $120/year per developer',
+      perDevMonth: '/ dev / month',
+      freePeriod: '/ forever',
       developer: {
         name: 'Developer',
         badge: 'Free Forever',
@@ -308,6 +315,7 @@ export const translations = {
       messagePlaceholder: 'Tell us about your team size, tech stack, and goals...',
       consentText: 'I agree to the processing of personal data in accordance with the ',
       consentLink: 'Privacy Policy',
+      consentError: 'Please agree to personal data processing before submitting',
       submitBtn: 'Send Message',
       sendingBtn: 'Sending...',
       successTitle: 'Message Received!',
@@ -329,12 +337,16 @@ export const translations = {
       submitBtn: 'Create Account & Start Free',
       hasAccount: 'Already have an account?',
       signInLink: 'Sign In',
-      termsNote: 'By continuing, you agree to our Terms of Service and Privacy Policy. Zero-Data Retention guaranteed.'
+      termsNote: 'By continuing, you agree to our Terms of Service and Privacy Policy. Zero-Data Retention guaranteed.',
+      successTitle: 'Welcome to CodePulse!',
+      successDesc: 'Account created successfully. 14-day Pro trial is active.',
+      goToDashboard: 'Go to Dashboard →'
     },
     footer: {
       bio: 'Autonomous platform for code review, vulnerability detection, and automated patch generation in Git Pull Requests.',
       statusNormal: 'All systems operational',
       uptime: '99.99% Uptime',
+      contactBtn: 'Contact Sales',
       colProduct: 'Product',
       colIntegrations: 'Integrations',
       colSecurity: 'Security',
@@ -382,6 +394,10 @@ export const translations = {
         fileAuth: 'auth_service.py',
         fileDb: 'database_queries.go',
         fileWebhook: 'webhook_dispatch.ts',
+        fileDbStatus: 'Чисто',
+        fileWebhookStatus: 'Чисто',
+        cleanFileHeading: 'Уязвимостей не обнаружено',
+        cleanFileDesc: 'CodePulse выполнил полный семантический анализ потока данных. Все входные параметры корректно санитизированы.',
         diffTab: 'Diff & AI Fix',
         astTab: 'AST Taint Flow',
         unverifiedCommit: 'Непроверенный коммит автора',
@@ -493,6 +509,7 @@ export const translations = {
       badge: 'Простой и прозрачный флоу',
       title: 'Как CodePulse защищает ваш код',
       subtitle: 'От создания ветки до безопасного деплоя в продакшн за 4 автоматических шага.',
+      stepLabel: 'ШАГ',
       steps: [
         {
           number: '01',
@@ -541,6 +558,8 @@ export const translations = {
       yearly: 'Ежегодно',
       discountBadge: 'Скидка 20%',
       saveYearly: 'Экономия $120 в год на каждого разработчика',
+      perDevMonth: '/ разраб / мес',
+      freePeriod: '/ навсегда',
       developer: {
         name: 'Developer',
         badge: 'Бесплатно навсегда',
@@ -653,6 +672,7 @@ export const translations = {
       messagePlaceholder: 'Расскажите о размере команды, технологическом стеке и задачах...',
       consentText: 'Я даю согласие на обработку персональных данных в соответствии с ',
       consentLink: 'Политикой конфиденциальности',
+      consentError: 'Пожалуйста, дайте согласие на обработку персональных данных',
       submitBtn: 'Отправить сообщение',
       sendingBtn: 'Отправка...',
       successTitle: 'Сообщение успешно отправлено!',
@@ -674,12 +694,16 @@ export const translations = {
       submitBtn: 'Создать аккаунт и начать бесплатно',
       hasAccount: 'Уже есть аккаунт?',
       signInLink: 'Войти',
-      termsNote: 'Продолжая, вы соглашаетесь с Условиями обслуживания и Политикой Zero-Data Retention.'
+      termsNote: 'Продолжая, вы соглашаетесь с Условиями обслуживания и Политикой Zero-Data Retention.',
+      successTitle: 'Добро пожаловать в CodePulse!',
+      successDesc: 'Аккаунт успешно создан. Включаем 14 дней тарифа Pro и готовим интеграцию с Git.',
+      goToDashboard: 'Перейти в панель управления →'
     },
     footer: {
       bio: 'Автономная платформа для ревью кода, поиска логических уязвимостей и автоматического создания проверенных патчей в Pull Request.',
       statusNormal: 'Все системы работают штатно',
       uptime: '99.99% Uptime',
+      contactBtn: 'Связаться с отделом продаж',
       colProduct: 'Продукт',
       colIntegrations: 'Интеграции',
       colSecurity: 'Безопасность',
@@ -727,6 +751,10 @@ export const translations = {
         fileAuth: 'auth_service.py',
         fileDb: 'database_queries.go',
         fileWebhook: 'webhook_dispatch.ts',
+        fileDbStatus: 'Tīrs',
+        fileWebhookStatus: 'Tīrs',
+        cleanFileHeading: 'Ievainojamības nav atklātas',
+        cleanFileDesc: 'CodePulse veica pilnu semantisko datu plūsmas analīzi. Visi ieejas dati ir pareizi sanitizēti.',
         diffTab: 'Diff & AI Labojums',
         astTab: 'AST Taint Plūsma',
         unverifiedCommit: 'Autora nepārbaudīts komits',
@@ -838,6 +866,7 @@ export const translations = {
       badge: 'Vienkārša un caurspīdīga darbplūsma',
       title: 'Kā CodePulse aizsargā jūsu kodu',
       subtitle: 'No zara izveides līdz drošai izvietošanai produkcijā 4 automatizētos soļos.',
+      stepLabel: 'SOLIS',
       steps: [
         {
           number: '01',
@@ -886,6 +915,8 @@ export const translations = {
       yearly: 'Gadā',
       discountBadge: '20% ATLAIDE',
       saveYearly: 'Ietaupiet $120/gadā par katru izstrādātāju',
+      perDevMonth: '/ izstrādātājs / mēn',
+      freePeriod: '/ uz visiem laikiem',
       developer: {
         name: 'Developer',
         badge: 'Bezmaksas uz visiem laikiem',
@@ -999,6 +1030,7 @@ export const translations = {
       messagePlaceholder: 'Pastāstiet par savu komandu, tehnoloģiju steku un mērķiem...',
       consentText: 'Es piekrītu personas datu apstrādei saskaņā ar ',
       consentLink: 'Privātuma politiku',
+      consentError: 'Lūdzu, apstipriniet piekrišanu personas datu apstrādei',
       submitBtn: 'Nosūtīt ziņu',
       sendingBtn: 'Nosūta...',
       successTitle: 'Ziņa veiksmīgi nosūtīta!',
@@ -1020,12 +1052,16 @@ export const translations = {
       submitBtn: 'Izveidot kontu un sākt bez maksas',
       hasAccount: 'Jau ir konts?',
       signInLink: 'Pieslēgties',
-      termsNote: 'Turpinot, jūs piekrītat mūsu Pakalpojumu sniegšanas noteikumiem un Zero-Data Retention politikai.'
+      termsNote: 'Turpinot, jūs piekrītat mūsu Pakalpojumu sniegšanas noteikumiem un Zero-Data Retention politikai.',
+      successTitle: 'Laipni lūdzam CodePulse!',
+      successDesc: 'Konts veiksmīgi izveidots. 14 dienu Pro izmēģinājums ir aktīvs.',
+      goToDashboard: 'Doties uz paneli →'
     },
     footer: {
       bio: 'Autonoma platforma koda pārskatīšanai, ievainojamību meklēšanai un automātiskai labojumu ģenerēšanai Git Pull Requestos.',
       statusNormal: 'Visas sistēmas darbojas nevainojami',
       uptime: '99.99% Uptime',
+      contactBtn: 'Sazināties ar pārdošanu',
       colProduct: 'Produkts',
       colIntegrations: 'Integrācijas',
       colSecurity: 'Drošība',
@@ -1036,4 +1072,3 @@ export const translations = {
     }
   }
 };
-
