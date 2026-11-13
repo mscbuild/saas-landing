@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Sparkles, 
   ArrowRight, 
@@ -200,7 +200,7 @@ export default function Hero({ t, onOpenAuth }) {
               {/* Status pill on top right */}
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors duration-300 bg-slate-950">
-                  {isPatchApplied ? (
+                  {isPatchApplied || activeFile !== 'auth_service.py' ? (
                     <span className="flex items-center gap-1.5 text-emerald-400 border-emerald-500/30">
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                       {t.mockup.statusSecure}
@@ -252,8 +252,8 @@ export default function Hero({ t, onOpenAuth }) {
                 >
                   <FileCode className="w-3.5 h-3.5 text-slate-400" />
                   {t.mockup.fileDb}
-                  <span className="text-[10px] bg-slate-800 text-slate-400 px-1 py-0.2 rounded font-bold">
-                    Clean
+                  <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-1 py-0.2 rounded font-bold">
+                    {t.mockup.fileDbStatus || 'Clean'}
                   </span>
                 </button>
 
@@ -267,8 +267,8 @@ export default function Hero({ t, onOpenAuth }) {
                 >
                   <FileCode className="w-3.5 h-3.5 text-slate-400" />
                   {t.mockup.fileWebhook}
-                  <span className="text-[10px] bg-slate-800 text-slate-400 px-1 py-0.2 rounded font-bold">
-                    Clean
+                  <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-1 py-0.2 rounded font-bold">
+                    {t.mockup.fileWebhookStatus || 'Clean'}
                   </span>
                 </button>
               </div>
@@ -299,178 +299,241 @@ export default function Hero({ t, onOpenAuth }) {
             <div className="p-4 sm:p-6 bg-slate-950/70 font-mono text-xs sm:text-[13px] leading-relaxed overflow-x-auto min-h-[360px]">
               
               {activeTab === 'diff' ? (
-                <div className="space-y-1">
-                  
-                  {/* File header banner */}
-                  <div className="text-slate-500 text-xs pb-3 font-mono border-b border-slate-800/80 mb-3 flex items-center justify-between">
-                    <span>@@ -42,12 +42,15 @@ def verify_session_token(token: str, key_vault: KeyVault):</span>
-                    <span className="text-slate-400 font-sans text-xs">
-                      {isPatchApplied ? t.mockup.aiPatchApplied : t.mockup.unverifiedCommit}
-                    </span>
-                  </div>
-
-                  {/* Code Lines */}
-                  <div className="flex items-start gap-3 text-slate-400 py-0.5">
-                    <span className="w-8 text-right text-slate-600 select-none">42</span>
-                    <span className="text-slate-500 select-none"> </span>
-                    <span className="text-purple-400">import</span> <span className="text-slate-200">jwt, hmac, hashlib</span>
-                  </div>
-
-                  <div className="flex items-start gap-3 text-slate-400 py-0.5">
-                    <span className="w-8 text-right text-slate-600 select-none">43</span>
-                    <span className="text-slate-500 select-none"> </span>
-                    <span className="text-blue-400">def</span> <span className="text-amber-300">verify_session_token</span>
-                    <span className="text-slate-300">(token: str, secret_key: str):</span>
-                  </div>
-
-                  {/* Vulnerable vs Fixed Code */}
-                  {!isPatchApplied ? (
-                    <>
-                      <div className="flex items-start gap-3 bg-rose-950/40 border-l-2 border-rose-500 text-rose-200 py-1.5 px-1 -mx-1 rounded-r">
-                        <span className="w-8 text-right text-rose-400/80 select-none font-bold">44</span>
-                        <span className="text-rose-400 select-none font-bold">-</span>
-                        <span className="font-semibold">
-                          payload = jwt.decode(token, options={'{'}<span className="text-rose-300">"verify_signature": False</span>{'}'})
+                <div>
+                  {activeFile === 'auth_service.py' ? (
+                    <div className="space-y-1">
+                      {/* File header banner */}
+                      <div className="text-slate-500 text-xs pb-3 font-mono border-b border-slate-800/80 mb-3 flex items-center justify-between">
+                        <span>@@ -42,12 +42,15 @@ def verify_session_token(token: str, secret_key: str):</span>
+                        <span className="text-slate-400 font-sans text-xs">
+                          {isPatchApplied ? t.mockup.aiPatchApplied : t.mockup.unverifiedCommit}
                         </span>
                       </div>
 
-                      {/* AI Security Alert Card */}
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="my-3 p-3.5 sm:p-4 rounded-xl bg-slate-900 border border-rose-500/40 shadow-xl shadow-rose-950/30 font-sans"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex items-start gap-3">
-                            <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 shrink-0">
-                              <AlertTriangle className="w-5 h-5" />
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 uppercase">
-                                  {t.mockup.alertBadge}
-                                </span>
-                              </div>
-                              <h4 className="text-sm font-semibold text-white mb-1">
-                                {t.mockup.alertTitle}
-                              </h4>
-                              <p className="text-xs text-slate-300 leading-normal max-w-2xl mb-3">
-                                {t.mockup.alertDesc}
-                              </p>
-                              
-                              {/* CTA Inside Mockup */}
-                              <div className="flex flex-wrap items-center gap-2.5">
-                                <button
-                                  onClick={handleApplyFix}
-                                  disabled={isFixing}
-                                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white text-xs font-semibold flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                                >
-                                  {isFixing ? (
-                                    <>
-                                      <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                      <span>{t.mockup.applyingFix}</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Sparkles className="w-3.5 h-3.5 text-white" />
-                                      <span>{t.mockup.applyFixBtn}</span>
-                                    </>
-                                  )}
-                                </button>
-                                
-                                <span className="text-[11px] text-slate-400 italic">
-                                  {t.mockup.clickHint}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
+                      {/* Code Lines */}
+                      <div className="flex items-start gap-3 text-slate-400 py-0.5">
+                        <span className="w-8 text-right text-slate-600 select-none">42</span>
+                        <span className="text-slate-500 select-none"> </span>
+                        <span className="text-purple-400">import</span> <span className="text-slate-200">jwt, hmac, hashlib</span>
+                      </div>
 
                       <div className="flex items-start gap-3 text-slate-400 py-0.5">
-                        <span className="w-8 text-right text-slate-600 select-none">45</span>
+                        <span className="w-8 text-right text-slate-600 select-none">43</span>
                         <span className="text-slate-500 select-none"> </span>
-                        <span className="text-purple-400">return</span> <span className="text-slate-200">payload.get(<span className="text-emerald-300">"user_id"</span>)</span>
+                        <span className="text-blue-400">def</span> <span className="text-amber-300">verify_session_token</span>
+                        <span className="text-slate-300">(token: str, secret_key: str):</span>
                       </div>
-                    </>
-                  ) : (
-                    /* FIXED PATCH STATE */
-                    <>
-                      <motion.div
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="space-y-1"
-                      >
-                        <div className="flex items-start gap-3 bg-emerald-950/40 border-l-2 border-emerald-400 text-emerald-200 py-1 px-1 -mx-1 rounded-r">
-                          <span className="w-8 text-right text-emerald-400/80 select-none font-bold">44</span>
-                          <span className="text-emerald-400 select-none font-bold">+</span>
-                          <span className="font-semibold text-emerald-300">
-                            # CodePulse Patch [SEC-AUTO-482]: HS256 algorithm enforcement & timestamp verification
-                          </span>
-                        </div>
-                        <div className="flex items-start gap-3 bg-emerald-950/40 border-l-2 border-emerald-400 text-emerald-200 py-1 px-1 -mx-1 rounded-r">
-                          <span className="w-8 text-right text-emerald-400 select-none font-bold">45</span>
-                          <span className="text-emerald-400 select-none font-bold">+</span>
-                          <span className="font-semibold">
-                            payload = jwt.decode(token, secret_key, algorithms=[<span className="text-amber-300">"HS256"</span>], options={'{'}<span className="text-emerald-300">"require": ["exp", "sub"]</span>{'}'})
-                          </span>
-                        </div>
-                        <div className="flex items-start gap-3 bg-emerald-950/40 border-l-2 border-emerald-400 text-emerald-200 py-1 px-1 -mx-1 rounded-r">
-                          <span className="w-8 text-right text-emerald-400 select-none font-bold">46</span>
-                          <span className="text-emerald-400 select-none font-bold">+</span>
-                          <span className="font-semibold">
-                            <span className="text-purple-400">if not</span> hmac.compare_digest(payload.get(<span className="text-amber-300">"issuer"</span>, <span className="text-amber-300">""</span>), <span className="text-amber-300">"codepulse.auth"</span>):
-                          </span>
-                        </div>
-                      </motion.div>
 
-                      {/* Success Card with Reset Option */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="my-3 p-3.5 sm:p-4 rounded-xl bg-slate-900 border border-emerald-500/40 shadow-xl shadow-emerald-950/20 font-sans"
-                      >
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shrink-0">
-                              <CheckCircle2 className="w-5 h-5" />
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-emerald-400 uppercase">
-                                  {t.mockup.patchVerified}
-                                </span>
-                                <span className="text-xs text-slate-400 font-mono">{t.mockup.testsGenerated}</span>
-                              </div>
-                              <p className="text-xs text-slate-300">
-                                {t.mockup.patchDesc}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2 self-end sm:self-center">
-                            <button
-                              onClick={handleResetFix}
-                              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1.5 border border-white/5 transition-colors"
-                            >
-                              <RotateCcw className="w-3.5 h-3.5" />
-                              <span>{t.mockup.resetBtn}</span>
-                            </button>
-                            <span className="px-3 py-1.5 rounded-lg bg-emerald-600/20 border border-emerald-500/30 text-emerald-300 text-xs font-semibold">
-                              {t.mockup.prApproved}
+                      {/* Vulnerable vs Fixed Code */}
+                      {!isPatchApplied ? (
+                        <>
+                          <div className="flex items-start gap-3 bg-rose-950/40 border-l-2 border-rose-500 text-rose-200 py-1.5 px-1 -mx-1 rounded-r">
+                            <span className="w-8 text-right text-rose-400/80 select-none font-bold">44</span>
+                            <span className="text-rose-400 select-none font-bold">-</span>
+                            <span className="font-semibold">
+                              payload = jwt.decode(token, options={'{'}<span className="text-rose-300">"verify_signature": False</span>{'}'})
                             </span>
                           </div>
-                        </div>
-                      </motion.div>
 
-                      <div className="flex items-start gap-3 text-slate-400 py-0.5">
-                        <span className="w-8 text-right text-slate-600 select-none">47</span>
-                        <span className="text-slate-500 select-none"> </span>
-                        <span className="text-purple-400">return</span> <span className="text-slate-200">payload.get(<span className="text-emerald-300">"sub"</span>)</span>
+                          {/* AI Security Alert Card */}
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="my-3 p-3.5 sm:p-4 rounded-xl bg-slate-900 border border-rose-500/40 shadow-xl shadow-rose-950/30 font-sans"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex items-start gap-3">
+                                <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 shrink-0">
+                                  <AlertTriangle className="w-5 h-5" />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="text-xs font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 uppercase">
+                                      {t.mockup.alertBadge}
+                                    </span>
+                                  </div>
+                                  <h4 className="text-sm font-semibold text-white mb-1">
+                                    {t.mockup.alertTitle}
+                                  </h4>
+                                  <p className="text-xs text-slate-300 leading-normal max-w-2xl mb-3">
+                                    {t.mockup.alertDesc}
+                                  </p>
+                                  
+                                  <div className="flex flex-wrap items-center gap-2.5">
+                                    <button
+                                      onClick={handleApplyFix}
+                                      disabled={isFixing}
+                                      className="px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white text-xs font-semibold flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                    >
+                                      {isFixing ? (
+                                        <>
+                                          <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                          <span>{t.mockup.applyingFix}</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Sparkles className="w-3.5 h-3.5 text-white" />
+                                          <span>{t.mockup.applyFixBtn}</span>
+                                        </>
+                                      )}
+                                    </button>
+                                    
+                                    <span className="text-[11px] text-slate-400 italic">
+                                      {t.mockup.clickHint}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+
+                          <div className="flex items-start gap-3 text-slate-400 py-0.5">
+                            <span className="w-8 text-right text-slate-600 select-none">45</span>
+                            <span className="text-slate-500 select-none"> </span>
+                            <span className="text-purple-400">return</span> <span className="text-slate-200">payload.get(<span className="text-emerald-300">"user_id"</span>)</span>
+                          </div>
+                        </>
+                      ) : (
+                        /* FIXED PATCH STATE */
+                        <>
+                          <motion.div
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="space-y-1"
+                          >
+                            <div className="flex items-start gap-3 bg-emerald-950/40 border-l-2 border-emerald-400 text-emerald-200 py-1 px-1 -mx-1 rounded-r">
+                              <span className="w-8 text-right text-emerald-400/80 select-none font-bold">44</span>
+                              <span className="text-emerald-400 select-none font-bold">+</span>
+                              <span className="font-semibold text-emerald-300">
+                                # CodePulse Patch [SEC-AUTO-482]: HS256 enforcement & timestamp verification
+                              </span>
+                            </div>
+                            <div className="flex items-start gap-3 bg-emerald-950/40 border-l-2 border-emerald-400 text-emerald-200 py-1 px-1 -mx-1 rounded-r">
+                              <span className="w-8 text-right text-emerald-400 select-none font-bold">45</span>
+                              <span className="text-emerald-400 select-none font-bold">+</span>
+                              <span className="font-semibold">
+                                payload = jwt.decode(token, secret_key, algorithms=[<span className="text-amber-300">"HS256"</span>], options={'{'}<span className="text-emerald-300">"require": ["exp", "sub"]</span>{'}'})
+                              </span>
+                            </div>
+                            <div className="flex items-start gap-3 bg-emerald-950/40 border-l-2 border-emerald-400 text-emerald-200 py-1 px-1 -mx-1 rounded-r">
+                              <span className="w-8 text-right text-emerald-400 select-none font-bold">46</span>
+                              <span className="text-emerald-400 select-none font-bold">+</span>
+                              <span className="font-semibold">
+                                <span className="text-purple-400">if not</span> hmac.compare_digest(payload.get(<span className="text-amber-300">"issuer"</span>, <span className="text-amber-300">""</span>), <span className="text-amber-300">"codepulse.auth"</span>):
+                              </span>
+                            </div>
+                          </motion.div>
+
+                          {/* Success Card with Reset Option */}
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="my-3 p-3.5 sm:p-4 rounded-xl bg-slate-900 border border-emerald-500/40 shadow-xl shadow-emerald-950/20 font-sans"
+                          >
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shrink-0">
+                                  <CheckCircle2 className="w-5 h-5" />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-emerald-400 uppercase">
+                                      {t.mockup.patchVerified}
+                                    </span>
+                                    <span className="text-xs text-slate-400 font-mono">{t.mockup.testsGenerated}</span>
+                                  </div>
+                                  <p className="text-xs text-slate-300">
+                                    {t.mockup.patchDesc}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2 self-end sm:self-center">
+                                <button
+                                  onClick={handleResetFix}
+                                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1.5 border border-white/5 transition-colors"
+                                >
+                                  <RotateCcw className="w-3.5 h-3.5" />
+                                  <span>{t.mockup.resetBtn}</span>
+                                </button>
+                                <span className="px-3 py-1.5 rounded-lg bg-emerald-600/20 border border-emerald-500/30 text-emerald-300 text-xs font-semibold">
+                                  {t.mockup.prApproved}
+                                </span>
+                              </div>
+                            </div>
+                          </motion.div>
+
+                          <div className="flex items-start gap-3 text-slate-400 py-0.5">
+                            <span className="w-8 text-right text-slate-600 select-none">47</span>
+                            <span className="text-slate-500 select-none"> </span>
+                            <span className="text-purple-400">return</span> <span className="text-slate-200">payload.get(<span className="text-emerald-300">"sub"</span>)</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ) : activeFile === 'database_queries.go' ? (
+                    /* Go File View */
+                    <div className="space-y-1">
+                      <div className="text-slate-500 text-xs pb-3 font-mono border-b border-slate-800/80 mb-3 flex items-center justify-between">
+                        <span>@@ -18,10 +18,10 @@ func GetUserByID(ctx context.Context, db *sql.DB, id string)</span>
+                        <span className="text-emerald-400 font-sans text-xs">✓ {t.mockup.fileDbStatus}</span>
                       </div>
-                    </>
+                      <div className="text-slate-400 py-0.5">
+                        <span className="w-8 inline-block text-right text-slate-600 mr-3 select-none">18</span>
+                        <span className="text-blue-400">package</span> <span className="text-slate-200">db</span>
+                      </div>
+                      <div className="text-slate-400 py-0.5">
+                        <span className="w-8 inline-block text-right text-slate-600 mr-3 select-none">19</span>
+                        <span className="text-blue-400">func</span> <span className="text-amber-300">GetUserByID</span>(ctx context.Context, db *sql.DB, id string) (*User, error) &#123;
+                      </div>
+                      <div className="text-emerald-300 bg-emerald-950/30 py-1 px-1 -mx-1 rounded">
+                        <span className="w-8 inline-block text-right text-emerald-400/80 mr-3 select-none">20</span>
+                        <span>    row := db.QueryRowContext(ctx, <span className="text-amber-300">"SELECT id, email, role FROM users WHERE id = $1"</span>, id)</span>
+                      </div>
+                      <div className="text-slate-400 py-0.5">
+                        <span className="w-8 inline-block text-right text-slate-600 mr-3 select-none">21</span>
+                        <span>    <span className="text-purple-400">return</span> scanUser(row)</span>
+                      </div>
+                      <div className="mt-4 p-4 rounded-xl bg-slate-900 border border-emerald-500/30 text-xs font-sans">
+                        <div className="flex items-center gap-2 text-emerald-400 font-semibold mb-1">
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>{t.mockup.cleanFileHeading}</span>
+                        </div>
+                        <p className="text-slate-300 text-xs">{t.mockup.cleanFileDesc}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    /* TypeScript Webhook View */
+                    <div className="space-y-1">
+                      <div className="text-slate-500 text-xs pb-3 font-mono border-b border-slate-800/80 mb-3 flex items-center justify-between">
+                        <span>@@ -12,8 +12,8 @@ export async function dispatchWebhook(...)</span>
+                        <span className="text-emerald-400 font-sans text-xs">✓ {t.mockup.fileWebhookStatus}</span>
+                      </div>
+                      <div className="text-slate-400 py-0.5">
+                        <span className="w-8 inline-block text-right text-slate-600 mr-3 select-none">12</span>
+                        <span className="text-purple-400">import</span> &#123; validateAllowlist &#125; <span className="text-purple-400">from</span> <span className="text-emerald-300">'./security/ssrf'</span>;
+                      </div>
+                      <div className="text-slate-400 py-0.5">
+                        <span className="w-8 inline-block text-right text-slate-600 mr-3 select-none">13</span>
+                        <span className="text-blue-400">export async function</span> <span className="text-amber-300">dispatchWebhook</span>(url: string, payload: unknown) &#123;
+                      </div>
+                      <div className="text-emerald-300 bg-emerald-950/30 py-1 px-1 -mx-1 rounded">
+                        <span className="w-8 inline-block text-right text-emerald-400/80 mr-3 select-none">14</span>
+                        <span>    <span className="text-blue-400">const</span> safeUrl = validateAllowlist(url); <span className="text-slate-500">// SSRF mitigation</span></span>
+                      </div>
+                      <div className="text-slate-400 py-0.5">
+                        <span className="w-8 inline-block text-right text-slate-600 mr-3 select-none">15</span>
+                        <span>    <span className="text-purple-400">return</span> fetch(safeUrl, &#123; method: <span className="text-amber-300">'POST'</span>, body: JSON.stringify(payload) &#125;);</span>
+                      </div>
+                      <div className="mt-4 p-4 rounded-xl bg-slate-900 border border-emerald-500/30 text-xs font-sans">
+                        <div className="flex items-center gap-2 text-emerald-400 font-semibold mb-1">
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>{t.mockup.cleanFileHeading}</span>
+                        </div>
+                        <p className="text-slate-300 text-xs">{t.mockup.cleanFileDesc}</p>
+                      </div>
+                    </div>
                   )}
-
                 </div>
               ) : (
                 /* AST TAINT FLOW VIEW */

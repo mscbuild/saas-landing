@@ -137,7 +137,7 @@ export default function Pricing({ t, onOpenAuth }) {
                           ${isAnnual ? tier.priceAnnual : tier.priceMonthly}
                         </span>
                         <span className="text-sm text-slate-400">
-                          {tier.priceMonthly === 0 ? '' : '/ dev / month'}
+                          {tier.priceMonthly === 0 ? (t.freePeriod || '') : (t.perDevMonth || '/ dev / month')}
                         </span>
                       </div>
                     ) : (

@@ -65,7 +65,7 @@ export default function Footer({ t, onOpenContact }) {
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 hover:text-white text-xs font-medium transition-colors"
               >
                 <Mail className="w-3.5 h-3.5" />
-                <span>Contact Sales</span>
+                <span>{t.contactBtn || 'Contact Sales'}</span>
               </button>
             </div>
           </div>

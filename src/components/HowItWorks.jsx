@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  GitPullRequest, 
-  Cpu, 
-  ShieldCheck, 
-  GitMerge, 
-  CheckCircle2, 
+import {
+  GitPullRequest,
+  Cpu,
+  ShieldCheck,
+  GitMerge,
+  CheckCircle2,
   Sparkles
 } from 'lucide-react';
 
@@ -17,7 +17,7 @@ export default function HowItWorks({ t }) {
   return (
     <section id="how-it-works" className="py-24 bg-slate-950/60 border-t border-white/5 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-4">
@@ -40,11 +40,10 @@ export default function HowItWorks({ t }) {
               <button
                 key={step.number}
                 onClick={() => setActiveStep(idx)}
-                className={`p-4 rounded-2xl border text-left transition-all relative overflow-hidden ${
-                  isActive 
-                    ? 'bg-slate-900 border-indigo-500 shadow-xl shadow-indigo-950/40' 
-                    : 'bg-slate-950/40 border-white/5 text-slate-400 hover:text-white hover:bg-slate-900/40'
-                }`}
+                className={`p-4 rounded-2xl border text-left transition-all relative overflow-hidden ${isActive
+                  ? 'bg-slate-900 border-indigo-500 shadow-xl shadow-indigo-950/40'
+                  : 'bg-slate-950/40 border-white/5 text-slate-400 hover:text-white hover:bg-slate-900/40'
+                  }`}
               >
                 {isActive && (
                   <motion.div
@@ -56,9 +55,8 @@ export default function HowItWorks({ t }) {
                   <span className={`text-xs font-mono font-bold ${isActive ? 'text-indigo-400' : 'text-slate-400'}`}>
                     {step.number}
                   </span>
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                    isActive ? 'bg-indigo-500/20 text-indigo-300' : 'bg-slate-800 text-slate-400'
-                  }`}>
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${isActive ? 'bg-indigo-500/20 text-indigo-300' : 'bg-slate-800 text-slate-400'
+                    }`}>
                     {step.tag}
                   </span>
                 </div>
@@ -82,19 +80,19 @@ export default function HowItWorks({ t }) {
             className="p-6 sm:p-10 rounded-3xl bg-slate-900/80 border border-white/10 backdrop-blur-2xl shadow-2xl"
           >
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              
+
               {/* Left Column: Description */}
               <div className="lg:col-span-7 space-y-4">
                 <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 font-semibold uppercase">
-                  <span>STEP {t.steps[activeStep].number}</span>
+                  <span>{t.stepLabel || 'STEP'} {t.steps[activeStep].number}</span>
                   <span>•</span>
                   <span>{t.steps[activeStep].tag}</span>
                 </div>
-                
+
                 <h3 className="text-2xl sm:text-3xl font-bold text-white leading-snug">
                   {t.steps[activeStep].heading}
                 </h3>
-                
+
                 <p className="text-base text-slate-300 leading-relaxed font-normal">
                   {t.steps[activeStep].description}
                 </p>

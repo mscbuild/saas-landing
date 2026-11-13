@@ -17,7 +17,7 @@ export default function AuthModal({ isOpen, onClose, t }) {
     }, 700);
   };
 
-  const handleOAuth = (provider) => {
+  const handleOAuth = () => {
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
@@ -195,17 +195,17 @@ export default function AuthModal({ isOpen, onClose, t }) {
                 <CheckCircle2 className="w-8 h-8" />
               </div>
               <h4 className="text-2xl font-bold text-white tracking-tight">
-                Добро пожаловать в CodePulse!
+                {t.successTitle || 'Welcome to CodePulse!'}
               </h4>
               <p className="text-xs text-slate-300 max-w-xs mx-auto leading-relaxed">
-                Аккаунт успешно создан. Включаем 14 дней тарифа Pro и готовим интеграцию с Git.
+                {t.successDesc || 'Account created successfully. 14-day Pro trial is active.'}
               </p>
               <div className="pt-2">
                 <button
                   onClick={handleClose}
                   className="px-6 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-500 text-white text-xs font-semibold shadow-lg"
                 >
-                  Перейти в панель управления →
+                  {t.goToDashboard || 'Go to Dashboard →'}
                 </button>
               </div>
             </div>
@@ -215,4 +215,3 @@ export default function AuthModal({ isOpen, onClose, t }) {
     </AnimatePresence>
   );
 }
-
