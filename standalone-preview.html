@@ -1,0 +1,2801 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodePulse — Autonomous AI Code Review & Vulnerability Detection</title>
+  <meta name="description" content="CodePulse detects critical vulnerabilities (OWASP, CVEs, memory leaks) and generates verified auto-fixes directly in your Pull Requests in seconds.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            background: '#030712',
+            card: '#0f172a',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- React 18 & Babel Standalone -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      background-color: #030712;
+      color: #f8fafc;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+    ::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.4); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.6); }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased selection:bg-indigo-500 selection:text-white min-h-screen overflow-x-hidden">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // ==========================================
+    // TRANSLATIONS DICTIONARY (EN, RU, LV)
+    // ==========================================
+    const translations = {
+      en: {
+        langName: 'ENG',
+        langFull: 'English',
+        nav: {
+          features: 'Features',
+          howItWorks: 'How it works',
+          bento: 'Bento Grid',
+          pricing: 'Pricing',
+          faq: 'FAQ',
+          contact: 'Contact',
+          githubStars: '4.9k',
+          startFree: 'Start Free',
+        },
+        hero: {
+          badgePrefix: 'CodePulse 2.0:',
+          badgeText: 'Deep AST Analysis & 1-Click Auto-Fixes',
+          titlePart1: 'Autonomous Code Review & ',
+          titleGradient: 'SecOps-Grade Security',
+          titlePart2: ' in Every PR',
+          subtitle: 'CodePulse detects hidden architectural vulnerabilities (OWASP, memory leaks, CVEs) and automatically generates verified patches with unit tests directly in your Git repository in 15 seconds.',
+          emailPlaceholder: 'Enter your work email for GitHub/GitLab...',
+          ctaButton: 'Connect Repository',
+          successMessage: 'Great! Access link has been sent to your email.',
+          bullets: {
+            scanTime: 'Scans in < 15 seconds',
+            zeroRetention: 'Zero-Data Retention (code is never stored)',
+            soc2: 'SOC 2 Type II & OWASP Ready',
+          },
+          mockup: {
+            prTitle: 'feat(auth): migrate token parser to v2',
+            statusCritical: '1 Critical Vulnerability',
+            statusSecure: 'Secure (Score 99/100)',
+            engineName: 'Pulse-70B-Sec',
+            fileAuth: 'auth_service.py',
+            fileDb: 'database_queries.go',
+            fileWebhook: 'webhook_dispatch.ts',
+            diffTab: 'Diff & AI Fix',
+            astTab: 'AST Taint Flow',
+            unverifiedCommit: 'Unverified author commit',
+            aiPatchApplied: 'Patched by CodePulse AI Bot',
+            alertBadge: 'CRITICAL CWE-347 & CWE-327 (CVSS 9.8)',
+            alertTitle: 'JWT Signature Verification Disabled (Signature Bypass)',
+            alertDesc: 'Allows an attacker to forge an administrative claim by crafting an untrusted token without a secret key. Confirmed by CodePulse eBPF simulation.',
+            applyFixBtn: '✨ Apply AI Auto-Fix with Tests',
+            applyingFix: 'Generating verified patch in sandbox...',
+            clickHint: '(Click button to watch live AI remediation)',
+            patchVerified: '✓ Patch successfully verified',
+            testsGenerated: '12 unit tests generated',
+            patchDesc: 'Vulnerability CWE-347 eliminated. Branch is clean and ready for squash & merge.',
+            resetBtn: 'Reset Test',
+            prApproved: 'PR Approved',
+            astTitle: 'Semantic Data Flow Graph (AST Taint Tracking)',
+            astSubtitle: 'CodePulse tracks tainted untrusted variables from network sockets to database sinks:',
+            astSource: 'HTTP Header: Auth',
+            astTaint: 'jwt_verifier.py:44',
+            astSink: 'Sanitized Validator',
+            ciPipeline: 'CI Pipeline:',
+            scanSpeed: 'Scan time:',
+            botAuditActive: 'Automated Audit Active',
+          }
+        },
+        trustedBy: {
+          headline: 'Trusted by leading engineering teams and DevSecOps pioneers',
+          metricText: 'Over 18,400,000 lines of code scanned last month',
+          zeroBreaches: '0 confirmed breaches',
+        },
+        bento: {
+          badge: 'Next-Gen Security Engineering',
+          title: 'Bento Architecture of ',
+          titleGradient: 'CodePulse AI',
+          subtitle: 'No more noisy static linters with 500 false positives. CodePulse understands business logic and architectural context.',
+          card1: {
+            tag: 'AST Depth: 34 Levels',
+            title: 'Deep Contextual AST & Code Semantics Analysis',
+            desc: 'CodePulse parses code into Abstract Syntax Trees (AST) and tracks tainted data movement across microservices, Kafka topics, and databases.',
+            interactiveTitle: 'Interactive Data Flow Chain:',
+            clickHint: 'Click a node to inspect',
+            nodes: [
+              { id: 1, title: 'HTTP Request', type: 'Source', desc: 'User input parameters (JWT Token, Request Body)', status: 'untrusted' },
+              { id: 2, title: 'Auth Interceptor', type: 'Middleware', desc: 'Signature algorithm verification & schema decoding', status: 'analyzed' },
+              { id: 3, title: 'eBPF Sandbox', type: 'Execution', desc: 'Synthetic exploit simulation in kernel sandbox', status: 'safe' },
+              { id: 4, title: 'PostgreSQL Sink', type: 'Database', desc: 'Parameterized query with zero SQLi risk', status: 'secure' },
+            ],
+            sanitizedBadge: 'Taint Sanitized ✓',
+            footer: ['Polymorphic calls', 'Cross-service binding', 'Memory leak detection']
+          },
+          card2: {
+            badge: '0.1% False Positives',
+            title: 'Validation in eBPF Sandbox',
+            desc: 'CodePulse automatically runs synthetic exploits in an isolated virtualized kernel container to prove exploitability before alerting developers.',
+            accuracyLabel: 'Detection Precision',
+            accuracySub: 'Every single alert is validated for exploitability',
+            footerLeft: 'Linux eBPF Kernel',
+            footerRight: 'Zero Noise Policy',
+          },
+          card3: {
+            title: '1-Click AI Auto-Fixes with Tests',
+            desc: 'Don’t waste hours writing patches. CodePulse generates production-ready code with regression pytest/jest tests proving the flaw is gone.',
+            patchStatus: 'Passed (4/4)',
+            footerLeft: 'Pytest & Jest Suites',
+            footerRight: '100% Green CI',
+          },
+          card4: {
+            title: 'Continuous Real-Time Compliance & Audit Exports',
+            desc: 'Automated compliance evidence collection on every release. Instant export to SARIF, PDF, and Jira for CISO and external auditors.',
+            standards: {
+              owasp: [
+                { id: 'A01', name: 'Broken Access Control', status: 'Protected' },
+                { id: 'A02', name: 'Cryptographic Failures', status: 'Protected' },
+                { id: 'A03', name: 'Injection (SQL/NoSQL)', status: 'Protected' },
+                { id: 'A04', name: 'Insecure Design', status: 'Audit Passed' },
+              ],
+              soc2: [
+                { id: 'CC6.1', name: 'Logical Access Controls', status: 'Active' },
+                { id: 'CC6.6', name: 'Protection Against Flaws', status: 'Continuous' },
+                { id: 'CC7.1', name: 'Vulnerability Remediation', status: 'Automated' },
+                { id: 'CC8.1', name: 'Change Management in PR', status: 'Integrated' },
+              ],
+              pci: [
+                { id: 'Req 6.2', name: 'Software Security Lifecycle', status: 'Compliant' },
+                { id: 'Req 6.3', name: 'Vulnerability Remediation within SLA', status: 'In-PR Fixes' },
+                { id: 'Req 6.4', name: 'Web App Protection', status: 'Protected' },
+                { id: 'Req 6.5', name: 'Mitigation of Common Coding Flaws', status: 'Auto-Tests' },
+              ]
+            },
+            footerLeft: 'Auto-export to SARIF, Jira, Slack, ISO 27001',
+            footerRight: '100% Audit Readiness',
+          },
+          card5: {
+            badge: 'Setup in 60 seconds',
+            title: 'Seamlessly Integrates into Your CI/CD Without Friction',
+            desc: 'Install the official GitHub App or GitLab integration in one step. No 500-line configuration YAML files required.',
+            copyBtn: 'Copy',
+            copiedBtn: 'Copied!',
+            terminalLogs: [
+              'npx codepulse init --repo acme/backend',
+              '🔍 Authenticating via GitHub App... Success [✓]',
+              '📦 Detected: 14 microservices (Python, TypeScript, Go)',
+              '⚙️ Activating eBPF sandbox & OWASP 2026 rule pack...',
+              '✨ CodePulse active! All future PRs are protected.'
+            ]
+          }
+        },
+        howItWorks: {
+          badge: 'Simple & Transparent Flow',
+          title: 'How CodePulse Protects Your Codebase',
+          subtitle: 'From branch creation to production deploy in 4 automated steps.',
+          steps: [
+            {
+              number: '01',
+              title: 'Repository Connect',
+              tag: '60 seconds',
+              heading: 'One-click setup via GitHub App or GitLab OAuth',
+              description: 'CodePulse requests only minimal required read permissions for Pull Requests. Never clones private code to external storage — strict Zero Data Retention.',
+              badge: 'OAuth 2.0 Verified',
+              items: ['GitHub App installation', 'Branch policy selection (main, staging)', 'Security policy tuning']
+            },
+            {
+              number: '02',
+              title: 'PR Background Scan',
+              tag: '< 15 seconds',
+              heading: 'Automatic analysis on every git push without blocking CI',
+              description: 'CodePulse analyzes the Abstract Syntax Tree (AST) of changes in parallel with your build, matching diffs against whole-project architecture.',
+              badge: 'Parallel CI Execution',
+              items: ['AST diff analysis', 'Dependency graph correlation', 'CVE and secret leak audit']
+            },
+            {
+              number: '03',
+              title: 'AI Triage & Simulation',
+              tag: '99.9% precision',
+              heading: 'Exploit verification inside an isolated eBPF sandbox',
+              description: 'Specialized code LLM verifies actual exploitability. If an attack vector is blocked by upstream WAF or input sanitizers, false alarms are suppressed.',
+              badge: 'eBPF Kernel Enclave',
+              items: ['Payload attack simulation', 'Boundary condition analysis', 'False-positive elimination']
+            },
+            {
+              number: '04',
+              title: 'Auto-Fix & Merge',
+              tag: '1 Click',
+              heading: 'Ready-to-merge Pull Request with code patches and tests',
+              description: 'Developers receive an inline PR comment explaining the flaw with a single-click button to apply the verified patch. No review bottlenecks.',
+              badge: 'Green CI Passed',
+              items: ['Compiled patch code', '100% regression test coverage', 'Auto-approval from SecOps bot']
+            }
+          ]
+        },
+        pricing: {
+          badge: 'Transparent & Honest Pricing',
+          title: 'Invest in Reliability, ',
+          titleGradient: 'Not Incident Firefighting',
+          subtitle: '14-day free trial on the Pro plan. No credit card required.',
+          monthly: 'Monthly',
+          yearly: 'Yearly',
+          discountBadge: '20% OFF',
+          saveYearly: 'Save $120/year per developer',
+          developer: {
+            name: 'Developer',
+            badge: 'Free Forever',
+            desc: 'Ideal for individual developers, side projects, and open-source maintainers.',
+            priceMonthly: 0,
+            priceAnnual: 0,
+            features: [
+              'Up to 3 public or private repositories',
+              'Up to 60 PR scans per month',
+              'Basic CVE detection & API key leak audit',
+              'Supports Python, JS, TS, Go',
+              'GitHub Actions integration',
+              'Community Discord support'
+            ],
+            cta: 'Start for Free'
+          },
+          pro: {
+            name: 'Team (Pro)',
+            badge: '🔥 Most Popular Choice',
+            desc: 'For fast-moving engineering teams needing maximum velocity and zero vulnerability risk.',
+            priceMonthly: 49,
+            priceAnnual: 39,
+            features: [
+              'Unlimited repositories & PR scans',
+              'Deep contextual AST taint-flow analysis',
+              '1-Click AI Auto-Fixes with unit tests',
+              'eBPF isolated sandbox verification',
+              'Continuous compliance: OWASP, SOC 2, PCI',
+              'Integrations: GitHub, GitLab, Slack, Jira',
+              'Priority SLA support (response < 2h)'
+            ],
+            cta: 'Start 14-Day Free Pro Trial'
+          },
+          enterprise: {
+            name: 'Enterprise',
+            badge: 'On-Premise & Air-Gapped',
+            desc: 'For enterprise orgs, banks, and fintech teams with strict governance requirements.',
+            priceMonthly: 'Custom',
+            priceAnnual: 'Custom',
+            features: [
+              'Deploy in private cloud (AWS VPC, GCP, Azure)',
+              'Complete On-Premises isolation (Kubernetes)',
+              'Air-Gapped mode without internet connectivity',
+              'Custom LLM fine-tuning on your private codebase',
+              'SSO / SAML / Okta, RBAC & full audit trails',
+              'Dedicated DevSecOps engineer & 99.99% SLA'
+            ],
+            cta: 'Request Enterprise Demo'
+          },
+          guarantees: [
+            '30-day money-back guarantee',
+            'Invoice billing (Wire/SEPA) available',
+            '1-click subscription cancellation anytime'
+          ]
+        },
+        faq: {
+          badge: 'Frequently Asked Questions',
+          title: 'Everything You Need to Know Before Starting',
+          subtitle: 'Detailed technical answers regarding security, privacy, and architecture.',
+          items: [
+            {
+              q: 'Does CodePulse train on my private source code?',
+              a: 'Strictly no. We enforce a zero-data retention (ZDR) policy. Source code is processed strictly inside volatile memory in hardware-isolated Secure Enclaves and immediately discarded after scanning. Your code is never used to train public or foundational models.'
+            },
+            {
+              q: 'Does CodePulse slow down CI/CD pipeline runs?',
+              a: 'No. CodePulse runs asynchronously in parallel as soon as a PR is created or updated. Average deep AST analysis takes only 12-25 seconds, meaning your build and deploy pipelines are never blocked.'
+            },
+            {
+              q: 'How does CodePulse differ from legacy SAST tools (SonarQube, Snyk)?',
+              a: 'Legacy tools match rigid regex patterns and inundate teams with hundreds of false alarms. CodePulse combines whole-repo AST semantic graphs with LLM triage and executes synthetic exploits in an eBPF sandbox to confirm vulnerability. Moreover, CodePulse generates ready-to-merge patches with regression tests.'
+            },
+            {
+              q: 'How does CodePulse achieve 99.9% precision without false positives?',
+              a: 'We use dual-phase verification: first, the model identifies the tainted flow; then, a virtualized eBPF sandbox verifies exploitability given the actual execution environment. If upstream sanitizers or WAF rules mitigate the flaw, the alert is automatically dropped.'
+            },
+            {
+              q: 'Which programming languages and frameworks are supported?',
+              a: 'TypeScript, JavaScript, Python, Go, Rust, Java, Kotlin, C#, PHP, Ruby, Swift, as well as IaC templates: Terraform, Dockerfile, CloudFormation, and Kubernetes manifests.'
+            },
+            {
+              q: 'Can CodePulse be deployed On-Premises or Air-Gapped?',
+              a: 'Yes. Enterprise customers receive Helm charts for Kubernetes (EKS, GKE, OpenShift, Bare Metal). It can operate in complete network isolation with local weights (Llama 3, DeepSeek-Coder).'
+            }
+          ],
+          speakToArchitect: 'Have specific security or compliance questions? Talk to our Chief Security Architect'
+        },
+        cta: {
+          badge: 'Setup in 60 seconds • No credit card required',
+          title: 'Stop vulnerabilities before they ever hit ',
+          titleGradient: 'production',
+          subtitle: 'Connect your repository right now. CodePulse will analyze your next Pull Request and provide verified auto-fixes.',
+          emailPlaceholder: 'Enter your work email...',
+          submitBtn: 'Start 14-Day Free Pro Trial',
+          successMsg: 'GitHub setup link has been sent to your email!',
+          zeroRetention: 'Zero-Retention Policy',
+          soc2: 'SOC 2 Type II Certified',
+          reviews: '★ 4.9/5 based on 480+ engineer reviews'
+        },
+        contactModal: {
+          title: 'Contact CodePulse Team',
+          subtitle: 'Have questions about enterprise deployment, custom compliance, or integrations? Send us a message and our security engineers will reach out within 2 hours.',
+          nameLabel: 'Full Name',
+          namePlaceholder: 'e.g. Alex Henderson',
+          emailLabel: 'Work Email',
+          emailPlaceholder: 'alex@company.com',
+          subjectLabel: 'Inquiry Topic',
+          subjectPlaceholder: 'Select topic...',
+          subjects: ['Enterprise Demo & Pricing', 'Technical Security & Compliance', 'Integration Support', 'Partnership'],
+          messageLabel: 'Message',
+          messagePlaceholder: 'Tell us about your team size, tech stack, and goals...',
+          consentText: 'I agree to the processing of personal data in accordance with the ',
+          consentLink: 'Privacy Policy',
+          submitBtn: 'Send Message',
+          sendingBtn: 'Sending...',
+          successTitle: 'Message Received!',
+          successDesc: 'Thank you for reaching out. A DevSecOps specialist will contact you shortly.',
+          closeBtn: 'Close'
+        },
+        authModal: {
+          title: 'Start Free with CodePulse',
+          subtitle: 'Connect your Git provider or create an account with work email. 14 days free Pro included.',
+          githubBtn: 'Continue with GitHub',
+          gitlabBtn: 'Continue with GitLab',
+          googleBtn: 'Continue with Google',
+          orEmail: 'or continue with work email',
+          emailLabel: 'Work Email',
+          emailPlaceholder: 'name@company.com',
+          passwordLabel: 'Password',
+          passwordPlaceholder: '••••••••',
+          forgotPassword: 'Forgot password?',
+          submitBtn: 'Create Account & Start Free',
+          hasAccount: 'Already have an account?',
+          signInLink: 'Sign In',
+          termsNote: 'By continuing, you agree to our Terms of Service and Privacy Policy. Zero-Data Retention guaranteed.'
+        },
+        footer: {
+          bio: 'Autonomous platform for code review, vulnerability detection, and automated patch generation in Git Pull Requests.',
+          statusNormal: 'All systems operational',
+          uptime: '99.99% Uptime',
+          colProduct: 'Product',
+          colIntegrations: 'Integrations',
+          colSecurity: 'Security',
+          copyright: 'CodePulse Inc. All rights reserved. Built for modern DevSecOps teams.',
+          privacy: 'Privacy Policy',
+          terms: 'Terms of Service',
+          hallOfFame: 'Security Hall of Fame'
+        }
+      },
+
+      ru: {
+        langName: 'RU',
+        langFull: 'Русский',
+        nav: {
+          features: 'Возможности',
+          howItWorks: 'Как это работает',
+          bento: 'Bento-обзор',
+          pricing: 'Тарифы',
+          faq: 'FAQ',
+          contact: 'Контакты',
+          githubStars: '4.9k',
+          startFree: 'Начать бесплатно',
+        },
+        hero: {
+          badgePrefix: 'CodePulse 2.0:',
+          badgeText: 'Глубокий AST-анализ & автофиксы в 1 клик',
+          titlePart1: 'Автономное ревью кода и безопасность уровня ',
+          titleGradient: 'SecOps в каждом PR',
+          titlePart2: '',
+          subtitle: 'CodePulse находит скрытые логические уязвимости (OWASP, утечки памяти, CVE) и автоматически генерирует проверенные патчи с юнит-тестами прямо в вашем Git-репозитории за 15 секунд.',
+          emailPlaceholder: 'Введите рабочий email для GitHub/GitLab...',
+          ctaButton: 'Подключить репозиторий',
+          successMessage: 'Отлично! Ссылка доступа отправлена на ваш email.',
+          bullets: {
+            scanTime: 'Сканирование за 15 секунд',
+            zeroRetention: 'Zero-Data Retention (код не сохраняется)',
+            soc2: 'SOC 2 Type II & OWASP Ready',
+          },
+          mockup: {
+            prTitle: 'feat(auth): migrate token parser to v2',
+            statusCritical: '1 Критическая уязвимость',
+            statusSecure: 'Безопасно (Score 99/100)',
+            engineName: 'Pulse-70B-Sec',
+            fileAuth: 'auth_service.py',
+            fileDb: 'database_queries.go',
+            fileWebhook: 'webhook_dispatch.ts',
+            diffTab: 'Diff & AI Fix',
+            astTab: 'AST Taint Flow',
+            unverifiedCommit: 'Непроверенный коммит автора',
+            aiPatchApplied: 'Патч применен CodePulse Bot',
+            alertBadge: 'CRITICAL CWE-347 & CWE-327 (CVSS 9.8)',
+            alertTitle: 'Отключение верификации подписи JWT (Signature Bypass)',
+            alertDesc: 'Позволяет атакующему создать токен с ролью администратора без знания секретного ключа. Подтверждено eBPF-симуляцией CodePulse.',
+            applyFixBtn: '✨ Применить AI-автофикс с тестами',
+            applyingFix: 'Генерация безопасного патча в песочнице...',
+            clickHint: '(Нажмите кнопку для живой демонстрации)',
+            patchVerified: '✓ Патч успешно верифицирован',
+            testsGenerated: '12 юнит-тестов сгенерировано',
+            patchDesc: 'Уязвимость CWE-347 устранена. Ветка готова к слиянию (Merge).',
+            resetBtn: 'Сбросить тест',
+            prApproved: 'PR Одобрен',
+            astTitle: 'Семантический граф потока данных (AST Dataflow)',
+            astSubtitle: 'CodePulse отслеживает происхождение недоверенных переменных от сетевого сокета до выполнения в базе данных:',
+            astSource: 'HTTP Header: Auth',
+            astTaint: 'jwt_verifier.py:44',
+            astSink: 'Sanitized Validator',
+            ciPipeline: 'CI Pipeline:',
+            scanSpeed: 'Время сканирования:',
+            botAuditActive: 'Автоматический аудит включен',
+          }
+        },
+        trustedBy: {
+          headline: 'Доверяют ведущие инженерные команды и DevSecOps лидеры',
+          metricText: 'Более 18,400,000 строк кода проанализировано за последний месяц',
+          zeroBreaches: '0 подтвержденных утечек',
+        },
+        bento: {
+          badge: 'Инженерия безопасности нового поколения',
+          title: 'Bento-архитектура ',
+          titleGradient: 'CodePulse AI',
+          subtitle: 'Никаких бесполезных статических сканеров со списком из 500 ложных алертов. CodePulse понимает бизнес-логику и контекст вашего приложения.',
+          card1: {
+            tag: 'AST Depth: 34 Levels',
+            title: 'Глубокий контекстный анализ AST & семантика кода',
+            desc: 'CodePulse разбирает код в абстрактное синтаксическое дерево (AST) и отслеживает перемещение «грязных» данных (Taint Analysis) между контроллерами, очередями Kafka и базами данных.',
+            interactiveTitle: 'Интерактивная цепочка потока данных:',
+            clickHint: 'Кликните для выбора узла',
+            nodes: [
+              { id: 1, title: 'HTTP Request', type: 'Source', desc: 'Входные данные от пользователя (JWT Token, Body)', status: 'untrusted' },
+              { id: 2, title: 'Auth Interceptor', type: 'Middleware', desc: 'Декодирование и верификация алгоритма подписи', status: 'analyzed' },
+              { id: 3, title: 'eBPF Sandbox', type: 'Execution', desc: 'Проверка эксплойта в виртуализированном ядре', status: 'safe' },
+              { id: 4, title: 'PostgreSQL Sink', type: 'Database', desc: 'Параметризованный запрос без риска SQLi', status: 'secure' },
+            ],
+            sanitizedBadge: 'Taint Sanitized ✓',
+            footer: ['Полиморфные вызовы', 'Кросс-модульное связывание', 'Анализ утечек памяти']
+          },
+          card2: {
+            badge: '0.1% False Positives',
+            title: 'Валидация в eBPF-песочнице',
+            desc: 'CodePulse автоматически запускает синтетический эксплойт в изолированной песочнице, чтобы доказать реальную уязвимость перед отправкой алерта.',
+            accuracyLabel: 'Точность детекции',
+            accuracySub: 'Каждый алерт проверен на эксплойт',
+            footerLeft: 'Ядро Linux eBPF',
+            footerRight: 'Zero Noise Policy',
+          },
+          card3: {
+            title: '1-Click AI Автофиксы с тестами',
+            desc: 'CodePulse генерирует готовый коммит с исправлением и регрессионными pytest/jest тестами, подтверждающими устранение бага.',
+            patchStatus: 'Passed (4/4)',
+            footerLeft: 'Pytest & Jest',
+            footerRight: '100% Green CI',
+          },
+          card4: {
+            title: 'Непрерывный комплаенс и экспорт аудиторских отчетов',
+            desc: 'Автоматическая фиксация подтверждений соответствия (Compliance Evidence) при каждом релизе. Экспорт в SARIF и Jira в 1 клик.',
+            standards: {
+              owasp: [
+                { id: 'A01', name: 'Broken Access Control', status: 'Защищено' },
+                { id: 'A02', name: 'Cryptographic Failures', status: 'Защищено' },
+                { id: 'A03', name: 'Injection (SQL/NoSQL)', status: 'Защищено' },
+                { id: 'A04', name: 'Insecure Design', status: 'Аудит пройден' },
+              ],
+              soc2: [
+                { id: 'CC6.1', name: 'Logical Access Controls', status: 'Активно' },
+                { id: 'CC6.6', name: 'Protection Against Flaws', status: 'Мониторинг' },
+                { id: 'CC7.1', name: 'Vulnerability Remediation', status: 'Автоматизировано' },
+                { id: 'CC8.1', name: 'Change Management in PR', status: 'Интегрировано' },
+              ],
+              pci: [
+                { id: 'Req 6.2', name: 'Software Security Lifecycle', status: 'Соответствует' },
+                { id: 'Req 6.3', name: 'Vulnerability SLA in PR', status: 'С фиксами' },
+                { id: 'Req 6.4', name: 'Web App Protection', status: 'Защищено' },
+                { id: 'Req 6.5', name: 'Common Coding Flaws Fix', status: 'Авто-тесты' },
+              ]
+            },
+            footerLeft: 'Экспорт в SARIF, Jira, Slack',
+            footerRight: '100% Audit Readiness',
+          },
+          card5: {
+            badge: 'Подключение за 60 секунд',
+            title: 'Встраивается в ваш существующий CI/CD без трения',
+            desc: 'Установите официальное приложение для GitHub, GitLab или подключите CLI-утилиту в один шаг без громоздких конфигураций.',
+            copyBtn: 'Копировать',
+            copiedBtn: 'Скопировано!',
+            terminalLogs: [
+              'npx codepulse init --repo acme/backend',
+              '🔍 Аутентификация через GitHub App... Успешно [✓]',
+              '📦 Обнаружено: 14 микросервисов (Python, TypeScript, Go)',
+              '⚙️ Активация eBPF-песочницы и базы правил OWASP 2026...',
+              '✨ CodePulse активен! Все будущие PR защищены.'
+            ]
+          }
+        },
+        howItWorks: {
+          badge: 'Простой и прозрачный флоу',
+          title: 'Как CodePulse защищает ваш код',
+          subtitle: 'От создания ветки до безопасного деплоя в продакшн за 4 автоматических шага.',
+          steps: [
+            {
+              number: '01',
+              title: 'Подключение репозитория',
+              tag: '60 сек',
+              heading: 'Установка в один клик через GitHub App или GitLab OAuth',
+              description: 'CodePulse запрашивает только минимально необходимые права для чтения Pull Request. Никакого клонирования закрытого кода на сторонние сервера — строгая политика Zero Data Retention.',
+              badge: 'OAuth 2.0 Verified',
+              items: ['Установка GitHub App', 'Выбор веток (main, staging)', 'Настройка политик безопасности']
+            },
+            {
+              number: '02',
+              title: 'Фоновое сканирование PR',
+              tag: '< 15 сек',
+              heading: 'Автоматический анализ при каждом git push без блокировки CI',
+              description: 'CodePulse параллельно со сборкой анализирует синтаксическое дерево (AST) изменений, сопоставляя их с архитектурным контекстом всего приложения.',
+              badge: 'Parallel CI Execution',
+              items: ['Анализ AST-диффа', 'Сопоставление с графом зависимостей', 'Аудит CVE и утечек секрета']
+            },
+            {
+              number: '03',
+              title: 'ИИ-триаж и симуляция',
+              tag: '99.9% точность',
+              heading: 'Верификация эксплойта в eBPF-песочнице',
+              description: 'Специализированная LLM-модель проверяет реальную эксплуатируемость уязвимости. Если вектор атаки заблокирован внешним WAF, ложный алерт отсекается.',
+              badge: 'eBPF Kernel Enclave',
+              items: ['Симуляция полезной нагрузки (Payload)', 'Проверка граничных условий', 'Отсечение ложных срабатываний']
+            },
+            {
+              number: '04',
+              title: 'Авто-фикс и слияние',
+              tag: 'В 1 клик',
+              heading: 'Готовый Pull Request с исправлением и юнит-тестами',
+              description: 'Разработчик получает комментарий прямо в PR с пояснением уязвимости и кнопкой применения безопасного патча. Никаких споров на код-ревью.',
+              badge: 'Green CI Passed',
+              items: ['Сгенерированный патч кода', '100% покрытие регрессионными тестами', 'Авто-аппрув от SecOps бота']
+            }
+          ]
+        },
+        pricing: {
+          badge: 'Прозрачные и честные тарифы',
+          title: 'Инвестируйте в надежность, ',
+          titleGradient: 'а не в тушение пожаров',
+          subtitle: '14 дней бесплатного пробного периода на плане Pro. Кредитная карта не требуется.',
+          monthly: 'Ежемесячно',
+          yearly: 'Ежегодно',
+          discountBadge: 'Скидка 20%',
+          saveYearly: 'Экономия $120 в год на каждого разработчика',
+          developer: {
+            name: 'Developer',
+            badge: 'Бесплатно навсегда',
+            desc: 'Для индивидуальных разработчиков, пет-проектов и соло-создателей.',
+            priceMonthly: 0,
+            priceAnnual: 0,
+            features: [
+              'До 3 репозиториев',
+              '60 PR проверок в месяц',
+              'Поиск CVE и утечек ключей',
+              'Поддержка Python, JS, TS, Go',
+              'GitHub Actions интеграция',
+              'Комьюнити-поддержка в Discord'
+            ],
+            cta: 'Начать бесплатно'
+          },
+          pro: {
+            name: 'Team (Pro)',
+            badge: '🔥 Самый популярный выбор',
+            desc: 'Для растущих продуктовых команд, которым нужна максимальная скорость и нулевой риск.',
+            priceMonthly: 49,
+            priceAnnual: 39,
+            features: [
+              'Неограниченно репозиториев и PR',
+              'Глубокий AST-анализ потока данных',
+              '1-Click AI автофиксы с тестами',
+              'Валидация в eBPF-песочнице',
+              'OWASP Top 10 & SOC 2 отчеты',
+              'Интеграции: GitHub, GitLab, Slack, Jira',
+              'Приоритетная поддержка (< 2ч)'
+            ],
+            cta: 'Попробовать 14 дней бесплатно'
+          },
+          enterprise: {
+            name: 'Enterprise',
+            badge: 'On-Premise & Air-Gapped',
+            desc: 'Для крупных технологических компаний и финтеха со строгими требованиями.',
+            priceMonthly: 'Custom',
+            priceAnnual: 'Custom',
+            features: [
+              'Развертывание в AWS VPC / Kubernetes',
+              'Air-Gapped режим без интернета',
+              'Дообучение моделей на вашей кодовой базе',
+              'SSO / SAML / Okta, RBAC и аудит',
+              'Выделенный инженер DevSecOps и SLA 99.99%'
+            ],
+            cta: 'Запросить демо для компании'
+          },
+          guarantees: [
+            '30-дневная гарантия возврата средств',
+            'Оплата по счету (Безналичный расчет)',
+            'Отмена подписки в 1 клик в любое время'
+          ]
+        },
+        faq: {
+          badge: 'Часто задаваемые вопросы',
+          title: 'Все, что нужно знать перед стартом',
+          subtitle: 'Ответы на ключевые технические вопросы об архитектуре и безопасности.',
+          items: [
+            {
+              q: 'Обучается ли CodePulse на моем закрытом исходном коде?',
+              a: 'Категорически нет. Мы придерживаемся строгой политики Zero-Data Retention (ZDR). Исходный код обрабатывается в защищенных изолированных анклавах (Secure Enclaves) в оперативной памяти и немедленно уничтожается после завершения сканирования.'
+            },
+            {
+              q: 'Замедляет ли CodePulse скорость сборки и прохождения CI/CD?',
+              a: 'Нет. CodePulse запускается асинхронно в параллельном потоке при создании или обновлении Pull Request. Среднее время глубокого анализа составляет 12-25 секунд. Ваши деплой-пайплайны не блокируются.'
+            },
+            {
+              q: 'Чем CodePulse отличается от традиционных SAST (SonarQube, Snyk)?',
+              a: 'Традиционные сканеры генерируют сотни ложных алертов по regex-паттернам. CodePulse понимает семантику AST, запускает симуляцию эксплойта в eBPF-песочнице и выдает готовый PR с исправлением и тестами.'
+            },
+            {
+              q: 'Как CodePulse достигает 99.9% точности и отсекает ложные срабатывания?',
+              a: 'Мы используем двухэтапную верификацию: сначала нейросеть выявляет потенциальную уязвимость и поток данных, затем в eBPF-песочнице эмулируется запуск эксплойта. Если эксплойт невозможно применить, алерт отсекается.'
+            },
+            {
+              q: 'Какие языки программирования и фреймворки поддерживаются?',
+              a: 'TypeScript, JavaScript, Python, Go, Rust, Java, Kotlin, C#, PHP, Ruby, Swift, а также Terraform, Dockerfile и Kubernetes YAML.'
+            },
+            {
+              q: 'Возможно ли развернуть CodePulse локально в On-Premises контуре?',
+              a: 'Да. На тарифе Enterprise доступно развертывание в вашем Kubernetes кластере (AWS EKS, GCP GKE, OpenShift) с поддержкой полностью изолированного air-gapped режима.'
+            }
+          ],
+          speakToArchitect: 'Остались вопросы по безопасности? Поговорите с нашим ведущим архитектором'
+        },
+        cta: {
+          badge: 'Старт за 60 секунд • Без кредитной карты',
+          title: 'Остановите уязвимости до того, как они попадут в ',
+          titleGradient: 'продакшн',
+          subtitle: 'Подключите репозиторий прямо сейчас. CodePulse автоматически проанализирует первый Pull Request и сгенерирует готовые исправления.',
+          emailPlaceholder: 'Введите рабочий email...',
+          submitBtn: 'Начать 14 дней Pro',
+          successMsg: 'Ссылка для подключения репозитория отправлена на почту!',
+          zeroRetention: 'Zero-Retention Policy',
+          soc2: 'SOC 2 Type II Сертифицировано',
+          reviews: '★ 4.9 из 5 на основе 480+ отзывов'
+        },
+        contactModal: {
+          title: 'Связаться с командой CodePulse',
+          subtitle: 'Есть вопросы по внедрению в Enterprise, кастомному комплаенсу или интеграциям? Отправьте сообщение, и наши DevSecOps инженеры свяжутся с вами в течение 2 часов.',
+          nameLabel: 'Ваше имя',
+          namePlaceholder: 'Константин Смирнов',
+          emailLabel: 'Рабочий email',
+          emailPlaceholder: 'k.smirnov@company.ru',
+          subjectLabel: 'Тема обращения',
+          subjectPlaceholder: 'Выберите тему...',
+          subjects: ['Демонстрация Enterprise и тарифы', 'Техническая безопасность и комплаенс', 'Помощь с интеграцией CI/CD', 'Партнерство'],
+          messageLabel: 'Сообщение',
+          messagePlaceholder: 'Расскажите о размере команды, технологическом стеке и задачах...',
+          consentText: 'Я даю согласие на обработку персональных данных в соответствии с ',
+          consentLink: 'Политикой конфиденциальности',
+          submitBtn: 'Отправить сообщение',
+          sendingBtn: 'Отправка...',
+          successTitle: 'Сообщение успешно отправлено!',
+          successDesc: 'Спасибо за обращение. Наш ведущий специалист свяжется с вами в течение 2 часов.',
+          closeBtn: 'Закрыть'
+        },
+        authModal: {
+          title: 'Регистрация и вход в CodePulse',
+          subtitle: 'Подключите ваш Git-провайдер или войдите с рабочим email. 14 дней тарифа Pro бесплатно.',
+          githubBtn: 'Продолжить через GitHub',
+          gitlabBtn: 'Продолжить через GitLab',
+          googleBtn: 'Продолжить через Google',
+          orEmail: 'или используйте рабочий email',
+          emailLabel: 'Рабочий email',
+          emailPlaceholder: 'name@company.com',
+          passwordLabel: 'Пароль',
+          passwordPlaceholder: '••••••••',
+          forgotPassword: 'Забыли пароль?',
+          submitBtn: 'Создать аккаунт и начать бесплатно',
+          hasAccount: 'Уже есть аккаунт?',
+          signInLink: 'Войти',
+          termsNote: 'Продолжая, вы соглашаетесь с Условиями обслуживания и Политикой Zero-Data Retention.'
+        },
+        footer: {
+          bio: 'Автономная платформа для ревью кода, поиска логических уязвимостей и автоматического создания проверенных патчей в Pull Request.',
+          statusNormal: 'Все системы работают штатно',
+          uptime: '99.99% Uptime',
+          colProduct: 'Продукт',
+          colIntegrations: 'Интеграции',
+          colSecurity: 'Безопасность',
+          copyright: 'CodePulse Inc. Все права защищены. Разработано для современных DevSecOps команд.',
+          privacy: 'Политика конфиденциальности',
+          terms: 'Условия использования',
+          hallOfFame: 'Security Hall of Fame'
+        }
+      },
+
+      lv: {
+        langName: 'LV',
+        langFull: 'Latviešu',
+        nav: {
+          features: 'Iespējas',
+          howItWorks: 'Kā tas strādā',
+          bento: 'Bento pārskats',
+          pricing: 'Cenas',
+          faq: 'BUJ',
+          contact: 'Kontakti',
+          githubStars: '4.9k',
+          startFree: 'Sākt bez maksas',
+        },
+        hero: {
+          badgePrefix: 'CodePulse 2.0:',
+          badgeText: 'Dziļā AST analīze & 1-klikšķa labojumi',
+          titlePart1: 'Autonoma koda pārskatīšana un ',
+          titleGradient: 'SecOps līmeņa drošība',
+          titlePart2: ' katrā PR',
+          subtitle: 'CodePulse atklāj slēptās arhitektūras ievainojamības (OWASP, atmiņas noplūdes, CVE) un 15 sekunžu laikā automātiski ģenerē pārbaudītus labojumus ar vienībtestiem tieši jūsu Git repozitorijā.',
+          emailPlaceholder: 'Ievadiet darba e-pastu GitHub/GitLab...',
+          ctaButton: 'Pieslēgt repozitoriju',
+          successMessage: 'Lieliski! Piekļuves saite ir nosūtīta uz jūsu e-pastu.',
+          bullets: {
+            scanTime: 'Skenēšana < 15 sekundēs',
+            zeroRetention: 'Zero-Data Retention (kods netiek saglabāts)',
+            soc2: 'SOC 2 Type II & OWASP Gatavība',
+          },
+          mockup: {
+            prTitle: 'feat(auth): migrate token parser to v2',
+            statusCritical: '1 Kritiska ievainojamība',
+            statusSecure: 'Drošs (Vērtējums 99/100)',
+            engineName: 'Pulse-70B-Sec',
+            fileAuth: 'auth_service.py',
+            fileDb: 'database_queries.go',
+            fileWebhook: 'webhook_dispatch.ts',
+            diffTab: 'Diff & AI Labojums',
+            astTab: 'AST Taint Plūsma',
+            unverifiedCommit: 'Autora nepārbaudīts komits',
+            aiPatchApplied: 'Labots ar CodePulse AI Botu',
+            alertBadge: 'KRITISKS CWE-347 & CWE-327 (CVSS 9.8)',
+            alertTitle: 'JWT paraksta verifikācija atslēgta (Signature Bypass)',
+            alertDesc: 'Ļauj uzbrucējam viltot administratora lomu bez slepenās atslēgas. Apstiprināts ar CodePulse eBPF simulāciju.',
+            applyFixBtn: '✨ Piemērot AI automātisko labojumu',
+            applyingFix: 'Droša labojuma ģenerēšana smilškastē...',
+            clickHint: '(Nospiediet pogu, lai redzētu tiešraides labojumu)',
+            patchVerified: '✓ Labojums veiksmīgi pārbaudīts',
+            testsGenerated: 'Ģenerēti 12 vienībtesti',
+            patchDesc: 'Ievainojamība CWE-347 novērsta. Zars ir gatavs sapludināšanai (Merge).',
+            resetBtn: 'Atiestatīt testu',
+            prApproved: 'PR Apstiprināts',
+            astTitle: 'Semantiskais datu plūsmas grafs (AST Taint Tracking)',
+            astSubtitle: 'CodePulse izseko neuzticamu mainīgo kustību no tīkla ligzdas līdz datubāzes izpildei:',
+            astSource: 'HTTP Galvene: Auth',
+            astTaint: 'jwt_verifier.py:44',
+            astSink: 'Sanitizēts validators',
+            ciPipeline: 'CI Konveijers:',
+            scanSpeed: 'Skenēšanas laiks:',
+            botAuditActive: 'Automātiskais audits aktīvs',
+          }
+        },
+        trustedBy: {
+          headline: 'Uzticas vadošās inženieru komandas un DevSecOps līderi',
+          metricText: 'Pagājušajā mēnesī noskenēts vairāk nekā 18 400 000 koda rindiņu',
+          zeroBreaches: '0 apstiprinātu datu noplūžu',
+        },
+        bento: {
+          badge: 'Nākamās paaudzes drošības inženierija',
+          title: 'Bento arhitektūra no ',
+          titleGradient: 'CodePulse AI',
+          subtitle: 'Nekādu bezjēdzīgu statisko skeneru ar 500 viltus trauksmēm. CodePulse saprot lietojumprogrammas biznesa loģiku un arhitektūras kontekstu.',
+          card1: {
+            tag: 'AST Dziļums: 34 Līmeņi',
+            title: 'Dziļā kontekstuālā AST & koda semantikas analīze',
+            desc: 'CodePulse parsē kodu abstraktā sintakses kokā (AST) un izseko "inficēto" datu plūsmu (Taint Analysis) starp mikropakalpojumiem, Kafka rindām un datubāzēm.',
+            interactiveTitle: 'Interaktīvā datu plūsmas ķēde:',
+            clickHint: 'Uzklikšķiniet uz mezgla, lai pārbaudītu',
+            nodes: [
+              { id: 1, title: 'HTTP Pieprasījums', type: 'Avots', desc: 'Lietotāja ievaddati (JWT Token, Pieprasījuma pamatteksts)', status: 'untrusted' },
+              { id: 2, title: 'Autentifikācijas pārtvērējs', type: 'Starpprogrammatūra', desc: 'Paraksta algoritma pārbaude un dekodēšana', status: 'analyzed' },
+              { id: 3, title: 'eBPF Smilškaste', type: 'Izpilde', desc: 'Sintētiskā eksploita pārbaude izolētā kodolā', status: 'safe' },
+              { id: 4, title: 'PostgreSQL Izpilde', type: 'Datubāze', desc: 'Parametrizēts vaicājums bez SQLi riska', status: 'secure' },
+            ],
+            sanitizedBadge: 'Dati sanitizēti ✓',
+            footer: ['Polimorfie izsaukumi', 'Starpmoduļu saistīšana', 'Atmiņas noplūžu analīze']
+          },
+          card2: {
+            badge: '0.1% Viltus trauksmes',
+            title: 'Validācija eBPF smilškastē',
+            desc: 'CodePulse automātiski palaiž sintētisko eksploitu izolētā smilškastē, lai pierādītu reālu ievainojamību pirms brīdinājuma nosūtīšanas programmētājam.',
+            accuracyLabel: 'Atklāšanas precizitāte',
+            accuracySub: 'Katra trauksme ir reāli pārbaudīta',
+            footerLeft: 'Linux eBPF Kodols',
+            footerRight: 'Nulles trokšņa politika',
+          },
+          card3: {
+            title: '1-Klikšķa AI labojumi ar testiem',
+            desc: 'Netērējiet laiku labojumu rakstīšanai. CodePulse ģenerē gatavu komitu ar drošu kodu un regresijas vienībtestiem.',
+            patchStatus: 'Nokārtots (4/4)',
+            footerLeft: 'Pytest & Jest testu komplekti',
+            footerRight: '100% Zaļš CI',
+          },
+          card4: {
+            title: 'Nepārtraukta atbilstība un audita atskaišu eksports',
+            desc: 'Automātiska atbilstības pierādījumu vākšana katrā laidienā. Tūlītējs eksports uz SARIF, PDF un Jira drošības vadītājiem un auditoriem.',
+            standards: {
+              owasp: [
+                { id: 'A01', name: 'Broken Access Control', status: 'Aizsargāts' },
+                { id: 'A02', name: 'Cryptographic Failures', status: 'Aizsargāts' },
+                { id: 'A03', name: 'Injection (SQL/NoSQL)', status: 'Aizsargāts' },
+                { id: 'A04', name: 'Insecure Design', status: 'Audits nokārtots' },
+              ],
+              soc2: [
+                { id: 'CC6.1', name: 'Logical Access Controls', status: 'Aktīvs' },
+                { id: 'CC6.6', name: 'Protection Against Flaws', status: 'Nepārtraukts' },
+                { id: 'CC7.1', name: 'Vulnerability Remediation', status: 'Automatizēts' },
+                { id: 'CC8.1', name: 'Change Management in PR', status: 'Integrēts' },
+              ],
+              pci: [
+                { id: 'Req 6.2', name: 'Software Security Lifecycle', status: 'Atbilst' },
+                { id: 'Req 6.3', name: 'Vulnerability Remediation in PR', status: 'Ar labojumiem' },
+                { id: 'Req 6.4', name: 'Public-Facing Web App Protection', status: 'Aizsargāts' },
+                { id: 'Req 6.5', name: 'Mitigation of Common Flaws', status: 'Auto-testi' },
+              ]
+            },
+            footerLeft: 'Eksports uz SARIF, Jira, Slack, ISO 27001',
+            footerRight: '100% Audita gatavība',
+          },
+          card5: {
+            badge: 'Uzstādīšana 60 sekundēs',
+            title: 'Viegli iekļaujas jūsu CI/CD bez berzes',
+            desc: 'Instalējiet oficiālo GitHub App vai GitLab integrāciju vienā solī. Nav nepieciešami 500 rindiņu konfigurācijas faili.',
+            copyBtn: 'Kopēt',
+            copiedBtn: 'Nokopēts!',
+            terminalLogs: [
+              'npx codepulse init --repo acme/backend',
+              '🔍 Autentifikācija caur GitHub App... Veiksmīgi [✓]',
+              '📦 Atklāti: 14 mikropakalpojumi (Python, TypeScript, Go)',
+              '⚙️ Aktivizē eBPF smilškasti un OWASP 2026 noteikumu pakotni...',
+              '✨ CodePulse ir aktīvs! Visi turpmākie PR ir aizsargāti.'
+            ]
+          }
+        },
+        howItWorks: {
+          badge: 'Vienkārša un caurspīdīga darbplūsma',
+          title: 'Kā CodePulse aizsargā jūsu kodu',
+          subtitle: 'No zara izveides līdz drošai izvietošanai produkcijā 4 automatizētos soļos.',
+          steps: [
+            {
+              number: '01',
+              title: 'Repozitorija pieslēgšana',
+              tag: '60 sekundes',
+              heading: 'Uzstādīšana ar vienu klikšķi caur GitHub App vai GitLab OAuth',
+              description: 'CodePulse pieprasa tikai minimālās lasīšanas tiesības Pull Request pārbaudei. Kods netiek saglabāts uz ārējiem serveriem — stingra Zero Data Retention politika.',
+              badge: 'OAuth 2.0 Verificēts',
+              items: ['GitHub App uzstādīšana', 'Zaru izvēle (main, staging)', 'Drošības politiku iestatīšana']
+            },
+            {
+              number: '02',
+              title: 'PR skenēšana fonā',
+              tag: '< 15 sekundes',
+              heading: 'Automātiska analīze katrā git push bez CI aizkaves',
+              description: 'CodePulse paralēli būvēšanas procesam analizē izmaiņu sintakses koku (AST), salīdzinot tās ar visas sistēmas arhitektūras kontekstu.',
+              badge: 'Paralēla CI Izpilde',
+              items: ['AST diff analīze', 'Atkarību grafa saskaņošana', 'CVE un noslēpumu noplūdes audits']
+            },
+            {
+              number: '03',
+              title: 'AI triāža un simulācija',
+              tag: '99.9% precizitāte',
+              heading: 'Eksploita verifikācija izolētā eBPF smilškastē',
+              description: 'Specializēts koda LLM modelis pārbauda ievainojamības reālo izmantojamību. Ja uzbrukuma vektors ir bloķēts ar ārēju WAF vai filtriem, viltus trauksme tiek atcelta.',
+              badge: 'eBPF Kodola Enklāvs',
+              items: ['Uzbrukuma slodzes simulācija', 'Robežnosacījumu pārbaude', 'Viltus trauksmju atcelšana']
+            },
+            {
+              number: '04',
+              title: 'Auto-labojums un sapludināšana',
+              tag: '1 Klikšķis',
+              heading: 'Gatavs Pull Request ar labojumiem un vienībtestiem',
+              description: 'Izstrādātājs saņem komentāru tieši PR ar ievainojamības skaidrojumu un pogu droša labojuma piemērošanai. Nekādu strīdu koda pārskatīšanā.',
+              badge: 'Zaļš CI Nokārtots',
+              items: ['Sastādīts labojuma kods', '100% regresijas testu pārklājums', 'Automātisks SecOps bota apstiprinājums']
+            }
+          ]
+        },
+        pricing: {
+          badge: 'Caurspīdīgas un godīgas cenas',
+          title: 'Ieguldiet uzticamībā, ',
+          titleGradient: 'nevis ugunsgrēku dzēšanā',
+          subtitle: '14 dienu bezmaksas izmēģinājums Pro plānam. Kredītkarte nav nepieciešama.',
+          monthly: 'Mēnesī',
+          yearly: 'Gadā',
+          discountBadge: '20% ATLAIDE',
+          saveYearly: 'Ietaupiet $120/gadā par katru izstrādātāju',
+          developer: {
+            name: 'Developer',
+            badge: 'Bezmaksas uz visiem laikiem',
+            desc: 'Ideāli piemērots individuāliem programmētājiem un atvērtā koda uzturētājiem.',
+            priceMonthly: 0,
+            priceAnnual: 0,
+            features: [
+              'Līdz 3 publiskiem vai privātiem repozitorijiem',
+              'Līdz 60 PR skenēšanām mēnesī',
+              'Pamata CVE un atslēgu noplūžu audits',
+              'Atbalsts Python, JS, TS, Go',
+              'GitHub Actions integrācija',
+              'Kopienas atbalsts Discord'
+            ],
+            cta: 'Sākt bez maksas'
+          },
+          pro: {
+            name: 'Team (Pro)',
+            badge: '🔥 Populārākā izvēle',
+            desc: 'Strauji augošām komandām, kurām nepieciešams maksimāls ātrums un nulles drošības risks.',
+            priceMonthly: 49,
+            priceAnnual: 39,
+            features: [
+              'Neierobežots repozitoriju un PR skaits',
+              'Dziļā kontekstuālā AST taint plūsmas analīze',
+              '1-Klikšķa AI automātiskie labojumi ar testiem',
+              'eBPF izolētas smilškastes verifikācija',
+              'Nepārtraukta atbilstība: OWASP, SOC 2, PCI',
+              'Integrācijas: GitHub, GitLab, Slack, Jira',
+              'Prioritārs SLA atbalsts (atbilde < 2h)'
+            ],
+            cta: 'Izmēģināt 14 dienas bez maksas'
+          },
+          enterprise: {
+            name: 'Enterprise',
+            badge: 'On-Premise & Air-Gapped',
+            desc: 'Lieliem uzņēmumiem, bankām un fintech komandām ar stingrām drošības prasībām.',
+            priceMonthly: 'Pielāgots',
+            priceAnnual: 'Pielāgots',
+            features: [
+              'Izvietošana privātajā mākonī (AWS VPC, GCP, Azure)',
+              'Pilnīga On-Premises izolācija (Kubernetes)',
+              'Air-Gapped režīms bez interneta pieslēguma',
+              'Pielāgotu LLM modeļu apmācība uz jūsu koda bāzes',
+              'SSO / SAML / Okta, RBAC un pilns audita žurnāls',
+              'Veltīts DevSecOps inženieris un 99.99% SLA'
+            ],
+            cta: 'Pieteikt Enterprise demonstrāciju'
+          },
+          guarantees: [
+            '30 dienu naudas atgriešanas garantija',
+            'Apmaksa ar rēķinu (Bankas pārskaitījums)',
+            'Abonementa atcelšana ar 1 klikšķi jebkurā laikā'
+          ]
+        },
+        faq: {
+          badge: 'Biežāk uzdotie jautājumi',
+          title: 'Viss, kas jums jāzina pirms darba sākšanas',
+          subtitle: 'Detalizētas tehniskās atbildes par drošību, privātumu un arhitektūru.',
+          items: [
+            {
+              q: 'Vai CodePulse tiek apmācīts uz mana privātā koda?',
+              a: 'Kategoriski nē. Mēs ievērojam stingru Zero-Data Retention (ZDR) politiku. Izejas kods tiek apstrādāts tikai operatīvajā atmiņā aparatūras izolētos Secure Enclaves un nekavējoties tiek izdzēsts pēc skenēšanas.'
+            },
+            {
+              q: 'Vai CodePulse palēnina CI/CD procesus?',
+              a: 'Nē. CodePulse darbojas asinhroni un paralēli uzreiz pēc PR izveides vai atjaunināšanas. Vidējais analīzes laiks ir 12-25 sekundes, tāpēc jūsu būvēšanas un izvietošanas konveijeri netiek bloķēti.'
+            },
+            {
+              q: 'Ar ko CodePulse atšķiras no tradicionālajiem SAST rīkiem (SonarQube, Snyk)?',
+              a: 'Tradicionālie rīki izmanto stingrus regex šablonus un rada simtiem viltus trauksmju. CodePulse apvieno visa repozitorija AST semantisko grafu ar eBPF smilškastes simulāciju un uzreiz piedāvā gatavu Pull Request ar labojumu un testiem.'
+            },
+            {
+              q: 'Kā CodePulse sasniedz 99.9% precizitāti bez viltus trauksmēm?',
+              a: 'Mēs izmantojam divu posmu verifikāciju: vispirms neironu tīkls atklāj ievainojamību, pēc tam eBPF smilškastē tiek emulēts reāls eksploita uzbrukums. Ja ievainojamību reāli nav iespējams ekspluatēt, trauksme tiek atcelta.'
+            },
+            {
+              q: 'Kādas programmēšanas valodas un ietvari tiek atbalstīti?',
+              a: 'TypeScript, JavaScript, Python, Go, Rust, Java, Kotlin, C#, PHP, Ruby, Swift, kā arī Terraform, Dockerfile un Kubernetes YAML.'
+            },
+            {
+              q: 'Vai CodePulse ir iespējams izvietot lokāli (On-Premises / VPC)?',
+              a: 'Jā. Enterprise plānā mēs nodrošinām Helm charts izvietošanai jūsu Kubernetes klasterī (AWS EKS, GCP GKE, OpenShift) ar pilnu air-gapped atbalstu bez interneta pieslēguma.'
+            }
+          ],
+          speakToArchitect: 'Vai jums ir jautājumi par drošību vai atbilstību? Konsultējieties ar mūsu galveno drošības arhitektu'
+        },
+        cta: {
+          badge: 'Uzstādīšana 60 sekundēs • Bez kredītkartes',
+          title: 'Apturiet ievainojamības pirms tās nonāk ',
+          titleGradient: 'produkcijā',
+          subtitle: 'Pieslēdziet savu repozitoriju tūlīt. CodePulse automātiski analizēs pirmo Pull Request un sagatavos pārbaudītus labojumus.',
+          emailPlaceholder: 'Ievadiet darba e-pastu...',
+          submitBtn: 'Sākt 14 dienu Pro izmēģinājumu',
+          successMsg: 'Pieslēgšanas saite ir nosūtīta uz jūsu e-pastu!',
+          zeroRetention: 'Zero-Retention Politika',
+          soc2: 'SOC 2 Type II Sertificēts',
+          reviews: '★ 4.9 no 5 (vairāk nekā 480 inženieru atsauksmju)'
+        },
+        contactModal: {
+          title: 'Sazināties ar CodePulse komandu',
+          subtitle: 'Vai jums ir jautājumi par Enterprise ieviešanu, atbilstības standartiem vai integrācijām? Nosūtiet ziņu, un mūsu DevSecOps inženieri sazināsies ar jums 2 stundu laikā.',
+          nameLabel: 'Vārds, Uzvārds',
+          namePlaceholder: 'Jānis Bērziņš',
+          emailLabel: 'Darba e-pasts',
+          emailPlaceholder: 'janis@uznemums.lv',
+          subjectLabel: 'Temats',
+          subjectPlaceholder: 'Izvēlieties tematu...',
+          subjects: ['Enterprise demonstrācija un cenas', 'Tehniskā drošība un atbilstība', 'CI/CD integrācijas palīdzība', 'Partnerība'],
+          messageLabel: 'Ziņojums',
+          messagePlaceholder: 'Pastāstiet par savu komandu, tehnoloģiju steku un mērķiem...',
+          consentText: 'Es piekrītu personas datu apstrādei saskaņā ar ',
+          consentLink: 'Privātuma politiku',
+          submitBtn: 'Nosūtīt ziņu',
+          sendingBtn: 'Nosūta...',
+          successTitle: 'Ziņa veiksmīgi nosūtīta!',
+          successDesc: 'Paldies par saziņu. Mūsu drošības speciālists sazināsies ar jums tuvāko 2 stundu laikā.',
+          closeBtn: 'Aizvērt'
+        },
+        authModal: {
+          title: 'Sāciet bez maksas ar CodePulse',
+          subtitle: 'Pieslēdziet savu Git nodrošinātāju vai reģistrējieties ar darba e-pastu. Iekļauts 14 dienu Pro izmēģinājums.',
+          githubBtn: 'Turpināt ar GitHub',
+          gitlabBtn: 'Turpināt ar GitLab',
+          googleBtn: 'Turpināt ar Google',
+          orEmail: 'vai turpināt ar darba e-pastu',
+          emailLabel: 'Darba e-pasts',
+          emailPlaceholder: 'vards@uznemums.lv',
+          passwordLabel: 'Parole',
+          passwordPlaceholder: '••••••••',
+          forgotPassword: 'Aizmirsi paroli?',
+          submitBtn: 'Izveidot kontu un sākt bez maksas',
+          hasAccount: 'Jau ir konts?',
+          signInLink: 'Pieslēgties',
+          termsNote: 'Turpinot, jūs piekrītat mūsu Pakalpojumu sniegšanas noteikumiem un Zero-Data Retention politikai.'
+        },
+        footer: {
+          bio: 'Autonoma platforma koda pārskatīšanai, ievainojamību meklēšanai un automātiskai labojumu ģenerēšanai Git Pull Requestos.',
+          statusNormal: 'Visas sistēmas darbojas nevainojami',
+          uptime: '99.99% Uptime',
+          colProduct: 'Produkts',
+          colIntegrations: 'Integrācijas',
+          colSecurity: 'Drošība',
+          copyright: 'CodePulse Inc. Visas tiesības aizsargātas. Izstrādāts modernām DevSecOps komandām.',
+          privacy: 'Privātuma politika',
+          terms: 'Lietošanas noteikumi',
+          hallOfFame: 'Drošības Slavas zāle'
+        }
+      }
+    };
+
+    // --- Lucide Icon Helper ---
+    function Icon({ name, size = 18, className = "" }) {
+      useEffect(() => {
+        if (window.lucide) {
+          window.lucide.createIcons();
+        }
+      }, [name]);
+      return <i data-lucide={name} className={`inline-block ${className}`} style={{ width: size, height: size }}></i>;
+    }
+
+    // --- Navbar ---
+    function Navbar({ lang, setLang, t, onOpenContact, onOpenAuth }) {
+      const [scrolled, setScrolled] = useState(false);
+      const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+      const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+
+      useEffect(() => {
+        const handleScroll = () => setScrolled(window.scrollY > 20);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+      }, []);
+
+      const languages = [
+        { code: 'en', label: 'ENG', fullName: 'English', flag: '🇬🇧' },
+        { code: 'ru', label: 'RU', fullName: 'Русский', flag: '🇷🇺' },
+        { code: 'lv', label: 'LV', fullName: 'Latviešu', flag: '🇱🇻' },
+      ];
+
+      const currentLang = languages.find(l => l.code === lang) || languages[0];
+
+      const navLinks = [
+        { name: t.nav.features, href: '#bento' },
+        { name: t.nav.howItWorks, href: '#how-it-works' },
+        { name: t.nav.pricing, href: '#pricing' },
+        { name: t.nav.faq, href: '#faq' },
+      ];
+
+      return (
+        <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${scrolled ? 'bg-slate-950/85 backdrop-blur-xl border-b border-white/10 shadow-2xl py-3' : 'bg-transparent py-5'}`}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between">
+              
+              {/* Logo */}
+              <a href="#" className="flex items-center gap-3 group">
+                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-cyan-400 p-[1px] shadow-lg shadow-indigo-500/25">
+                  <div className="w-full h-full bg-slate-950 rounded-[11px] flex items-center justify-center text-indigo-400">
+                    <Icon name="shield-check" size={20} />
+                  </div>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xl font-bold tracking-tight text-white flex items-center gap-1.5">
+                    Code<span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-300">Pulse</span>
+                    <span className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                      AI 2.0
+                    </span>
+                  </span>
+                </div>
+              </a>
+
+              {/* Desktop Nav */}
+              <nav className="hidden lg:flex items-center gap-1 bg-slate-900/50 border border-white/5 rounded-full px-4 py-1.5 backdrop-blur-md">
+                {navLinks.map((link) => (
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    className="px-3.5 py-1.5 text-xs lg:text-sm font-medium text-slate-300 hover:text-white rounded-full hover:bg-white/5 transition-colors"
+                  >
+                    {link.name}
+                  </a>
+                ))}
+                
+                {/* Contact Nav Button */}
+                <button
+                  onClick={onOpenContact}
+                  className="px-3.5 py-1.5 text-xs lg:text-sm font-medium text-cyan-300 hover:text-cyan-200 rounded-full hover:bg-cyan-500/10 transition-colors flex items-center gap-1.5"
+                >
+                  <Icon name="mail" size={14} />
+                  <span>{t.nav.contact}</span>
+                </button>
+              </nav>
+
+              {/* Right actions */}
+              <div className="hidden sm:flex items-center gap-3">
+                
+                {/* Language Dropdown (RU, ENG, LV) */}
+                <div className="relative">
+                  <button
+                    onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-slate-900/80 border border-white/10 rounded-xl hover:border-white/20 transition-all"
+                  >
+                    <span className="text-sm">{currentLang.flag}</span>
+                    <span className="font-mono">{currentLang.label}</span>
+                    <Icon name="chevron-down" size={14} />
+                  </button>
+
+                  {langDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-36 rounded-2xl bg-slate-900 border border-white/10 p-1.5 shadow-2xl z-50">
+                      {languages.map((l) => (
+                        <button
+                          key={l.code}
+                          onClick={() => {
+                            setLang(l.code);
+                            setLangDropdownOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors ${lang === l.code ? 'bg-indigo-600/20 text-indigo-300' : 'text-slate-300 hover:text-white hover:bg-white/5'}`}
+                        >
+                          <span className="flex items-center gap-2">
+                            <span>{l.flag}</span>
+                            <span>{l.fullName}</span>
+                          </span>
+                          <span className="font-mono text-[10px] text-slate-400">{l.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* GitHub stars */}
+                <a
+                  href="https://github.com"
+                  target="_blank"
+                  className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-300 hover:text-white"
+                >
+                  <Icon name="github" size={16} />
+                  <span className="text-xs bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700 font-mono">
+                    ★ {t.nav.githubStars}
+                  </span>
+                </a>
+
+                {/* Start Free -> Opens Auth Modal */}
+                <button
+                  onClick={onOpenAuth}
+                  className="px-4 py-2 text-xs lg:text-sm font-semibold text-white rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 shadow-md shadow-indigo-500/20 transition-all flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <span>{t.nav.startFree}</span>
+                  <Icon name="chevron-right" size={16} />
+                </button>
+              </div>
+
+              {/* Mobile button */}
+              <div className="sm:hidden flex items-center gap-2">
+                {/* Mobile Lang Button */}
+                <button
+                  onClick={() => {
+                    const next = lang === 'en' ? 'ru' : lang === 'ru' ? 'lv' : 'en';
+                    setLang(next);
+                  }}
+                  className="px-2 py-1 text-xs font-semibold bg-slate-900 border border-white/10 rounded-lg text-slate-200"
+                >
+                  {currentLang.flag} {currentLang.label}
+                </button>
+
+                <button
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="p-2 rounded-lg bg-slate-900 border border-white/10 text-slate-300"
+                >
+                  <Icon name={mobileMenuOpen ? 'x' : 'menu'} size={24} />
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Mobile menu */}
+          {mobileMenuOpen && (
+            <div className="sm:hidden bg-slate-950/95 border-b border-white/10 backdrop-blur-2xl px-6 py-4 space-y-3">
+              {navLinks.map((link) => (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-base font-medium text-slate-200 hover:text-cyan-400"
+                >
+                  {link.name}
+                </a>
+              ))}
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenContact();
+                }}
+                className="w-full text-left text-base font-medium text-cyan-400 flex items-center gap-2"
+              >
+                <Icon name="mail" size={16} />
+                <span>{t.nav.contact}</span>
+              </button>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenAuth();
+                }}
+                className="w-full text-center py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-cyan-500 mt-2"
+              >
+                {t.nav.startFree}
+              </button>
+            </div>
+          )}
+        </header>
+      );
+    }
+
+    // --- Hero with Live Interactive Mockup ---
+    function Hero({ t, onOpenAuth }) {
+      const [email, setEmail] = useState('');
+      const [subscribed, setSubscribed] = useState(false);
+      const [activeTab, setActiveTab] = useState('diff');
+      const [isPatchApplied, setIsPatchApplied] = useState(false);
+      const [isFixing, setIsFixing] = useState(false);
+
+      const handleApplyFix = () => {
+        setIsFixing(true);
+        setTimeout(() => {
+          setIsFixing(false);
+          setIsPatchApplied(true);
+        }, 600);
+      };
+
+      const handleResetFix = () => {
+        setIsPatchApplied(false);
+      };
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        if (email) setSubscribed(true);
+      };
+
+      return (
+        <section className="relative pt-28 pb-20 md:pt-36 md:pb-28 overflow-hidden">
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[450px] bg-gradient-to-tr from-indigo-600/20 via-purple-600/15 to-cyan-500/20 blur-[130px] -z-10 rounded-full pointer-events-none" />
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-4xl mx-auto">
+              
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 text-xs md:text-sm font-medium mb-6 backdrop-blur-md">
+                <span className="flex h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
+                <span className="font-semibold text-white">{t.badgePrefix}</span>
+                <span>{t.badgeText}</span>
+                <Icon name="chevron-right" size={14} className="text-indigo-400" />
+              </div>
+
+              {/* Title */}
+              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.1] mb-6">
+                {t.titlePart1}
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-300 to-cyan-300">
+                  {t.titleGradient}
+                </span>
+                {t.titlePart2}
+              </h1>
+
+              {/* Subtitle */}
+              <p className="text-lg sm:text-xl text-slate-300/90 max-w-3xl mx-auto mb-10 leading-relaxed font-normal">
+                {t.subtitle}
+              </p>
+
+              {/* CTA Form */}
+              <div className="max-w-xl mx-auto mb-8">
+                {!subscribed ? (
+                  <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-center gap-2 p-1.5 bg-slate-900/90 border border-white/15 rounded-2xl shadow-2xl backdrop-blur-xl">
+                    <div className="relative w-full">
+                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                        <Icon name="terminal" size={18} />
+                      </div>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        placeholder={t.emailPlaceholder}
+                        className="w-full pl-11 pr-4 py-3 bg-transparent text-sm text-white placeholder-slate-400 focus:outline-none"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full sm:w-auto whitespace-nowrap px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-400 hover:to-cyan-400 text-white text-sm font-semibold shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                      <span>{t.ctaButton}</span>
+                      <Icon name="arrow-right" size={16} />
+                    </button>
+                  </form>
+                ) : (
+                  <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-sm flex items-center justify-center gap-2 font-medium">
+                    <Icon name="check-circle-2" size={18} className="text-emerald-400" />
+                    <span>{t.successMessage}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Bullets */}
+              <div className="flex flex-wrap items-center justify-center gap-6 text-xs sm:text-sm text-slate-400 font-medium">
+                <div className="flex items-center gap-2">
+                  <Icon name="zap" size={16} className="text-cyan-400" />
+                  <span>{t.bullets.scanTime}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Icon name="lock" size={16} className="text-indigo-400" />
+                  <span>{t.bullets.zeroRetention}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Icon name="shield-check" size={16} className="text-emerald-400" />
+                  <span>{t.bullets.soc2}</span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* LIVE PRODUCT MOCKUP */}
+            <div className="mt-14 relative max-w-5xl mx-auto">
+              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 rounded-2xl blur-lg opacity-25 -z-10" />
+
+              <div className="bg-slate-900/90 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-2xl overflow-hidden font-sans">
+                
+                {/* Topbar */}
+                <div className="px-4 py-3 bg-slate-950/80 border-b border-white/10 flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-rose-500/80 border border-rose-600" />
+                      <div className="w-3 h-3 rounded-full bg-amber-500/80 border border-amber-600" />
+                      <div className="w-3 h-3 rounded-full bg-emerald-500/80 border border-emerald-600" />
+                    </div>
+                    <div className="h-4 w-[1px] bg-white/10 mx-1 hidden sm:block" />
+                    <div className="flex items-center gap-2 text-xs font-mono text-slate-300">
+                      <Icon name="git-pull-request" size={14} className="text-indigo-400" />
+                      <span className="text-slate-400">PR #482:</span>
+                      <span className="font-semibold text-white truncate max-w-[200px] sm:max-w-none">
+                        {t.mockup.prTitle}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Status score badge */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium border bg-slate-950">
+                      {isPatchApplied ? (
+                        <span className="flex items-center gap-1.5 text-emerald-400 border-emerald-500/30">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                          {t.mockup.statusSecure}
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1.5 text-rose-400 border-rose-500/30">
+                          <span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse" />
+                          {t.mockup.statusCritical}
+                        </span>
+                      )}
+                    </div>
+                    <div className="hidden sm:flex items-center gap-1 text-xs text-slate-400 font-mono">
+                      <span>Engine:</span>
+                      <span className="text-cyan-400 font-semibold">{t.mockup.engineName}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Subtoolbar */}
+                <div className="px-4 py-2 bg-slate-900/60 border-b border-white/5 flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 font-semibold">
+                      <Icon name="file-code" size={14} className="text-indigo-400" />
+                      {t.mockup.fileAuth}
+                      <span className={`text-[10px] px-1 py-0.2 rounded font-bold ${isPatchApplied ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}`}>
+                        {isPatchApplied ? '✓' : '!'}
+                      </span>
+                    </span>
+                    <span className="text-slate-400 hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs">
+                      <Icon name="file-code" size={14} />
+                      {t.mockup.fileDb}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-white/5">
+                    <button
+                      onClick={() => setActiveTab('diff')}
+                      className={`px-2.5 py-1 rounded text-xs transition-all ${activeTab === 'diff' ? 'bg-indigo-600 text-white font-medium' : 'text-slate-400'}`}
+                    >
+                      {t.mockup.diffTab}
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('ast')}
+                      className={`px-2.5 py-1 rounded text-xs transition-all ${activeTab === 'ast' ? 'bg-indigo-600 text-white font-medium' : 'text-slate-400'}`}
+                    >
+                      {t.mockup.astTab}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Code Body */}
+                <div className="p-4 sm:p-6 bg-slate-950/70 font-mono text-xs sm:text-[13px] leading-relaxed overflow-x-auto min-h-[350px]">
+                  {activeTab === 'diff' ? (
+                    <div className="space-y-1">
+                      <div className="text-slate-500 text-xs pb-3 font-mono border-b border-slate-800/80 mb-3 flex items-center justify-between">
+                        <span>@@ -42,12 +42,15 @@ def verify_session_token(token: str, secret_key: str):</span>
+                        <span className="text-slate-400 font-sans text-xs">
+                          {isPatchApplied ? t.mockup.aiPatchApplied : t.mockup.unverifiedCommit}
+                        </span>
+                      </div>
+
+                      <div className="flex items-start gap-3 text-slate-400 py-0.5">
+                        <span className="w-8 text-right text-slate-600 select-none">42</span>
+                        <span className="text-purple-400">import</span> <span className="text-slate-200">jwt, hmac, hashlib</span>
+                      </div>
+                      <div className="flex items-start gap-3 text-slate-400 py-0.5">
+                        <span className="w-8 text-right text-slate-600 select-none">43</span>
+                        <span className="text-blue-400">def</span> <span className="text-amber-300">verify_session_token</span><span className="text-slate-300">(token: str, secret_key: str):</span>
+                      </div>
+
+                      {!isPatchApplied ? (
+                        <div>
+                          {/* Vulnerable line */}
+                          <div className="flex items-start gap-3 bg-rose-950/40 border-l-2 border-rose-500 text-rose-200 py-1.5 px-1 -mx-1 rounded-r">
+                            <span className="w-8 text-right text-rose-400 select-none font-bold">44</span>
+                            <span className="text-rose-400 font-bold">-</span>
+                            <span className="font-semibold">
+                              payload = jwt.decode(token, options={'{'}<span className="text-rose-300">"verify_signature": False</span>{'}'})
+                            </span>
+                          </div>
+
+                          {/* AI Alert Card */}
+                          <div className="my-3 p-3.5 sm:p-4 rounded-xl bg-slate-900 border border-rose-500/40 shadow-xl font-sans">
+                            <div className="flex items-start gap-3">
+                              <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 shrink-0">
+                                <Icon name="alert-triangle" size={20} />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="text-xs font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 uppercase">
+                                    {t.mockup.alertBadge}
+                                  </span>
+                                </div>
+                                <h4 className="text-sm font-semibold text-white mb-1">
+                                  {t.mockup.alertTitle}
+                                </h4>
+                                <p className="text-xs text-slate-300 mb-3 max-w-2xl">
+                                  {t.mockup.alertDesc}
+                                </p>
+                                
+                                <div className="flex flex-wrap items-center gap-2.5">
+                                  <button
+                                    onClick={handleApplyFix}
+                                    disabled={isFixing}
+                                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white text-xs font-semibold flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                  >
+                                    {isFixing ? (
+                                      <span>{t.mockup.applyingFix}</span>
+                                    ) : (
+                                      <>
+                                        <Icon name="sparkles" size={14} className="text-white" />
+                                        <span>{t.mockup.applyFixBtn}</span>
+                                      </>
+                                    )}
+                                  </button>
+                                  <span className="text-[11px] text-slate-400 italic">
+                                    {t.mockup.clickHint}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-start gap-3 text-slate-400 py-0.5">
+                            <span className="w-8 text-right text-slate-600 select-none">45</span>
+                            <span className="text-purple-400">return</span> <span className="text-slate-200">payload.get("user_id")</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          {/* Green Fixed Lines */}
+                          <div className="space-y-1">
+                            <div className="flex items-start gap-3 bg-emerald-950/40 border-l-2 border-emerald-400 text-emerald-200 py-1 px-1 -mx-1 rounded-r">
+                              <span className="w-8 text-right text-emerald-400 select-none font-bold">44</span>
+                              <span className="text-emerald-400 font-bold">+</span>
+                              <span className="font-semibold text-emerald-300">
+                                # CodePulse Patch [SEC-AUTO-482]: HS256 enforcement & timestamp verification
+                              </span>
+                            </div>
+                            <div className="flex items-start gap-3 bg-emerald-950/40 border-l-2 border-emerald-400 text-emerald-200 py-1 px-1 -mx-1 rounded-r">
+                              <span className="w-8 text-right text-emerald-400 select-none font-bold">45</span>
+                              <span className="text-emerald-400 select-none font-bold">+</span>
+                              <span className="font-semibold">
+                                payload = jwt.decode(token, secret_key, algorithms=[<span className="text-amber-300">"HS256"</span>], options={'{'}<span className="text-emerald-300">"require": ["exp", "sub"]</span>{'}'})
+                              </span>
+                            </div>
+                            <div className="flex items-start gap-3 bg-emerald-950/40 border-l-2 border-emerald-400 text-emerald-200 py-1 px-1 -mx-1 rounded-r">
+                              <span className="w-8 text-right text-emerald-400 select-none font-bold">46</span>
+                              <span className="text-emerald-400 select-none font-bold">+</span>
+                              <span className="font-semibold">
+                                <span className="text-purple-400">if not</span> hmac.compare_digest(payload.get(<span className="text-amber-300">"issuer"</span>, <span className="text-amber-300">""</span>), <span className="text-amber-300">"codepulse.auth"</span>):
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Success Card */}
+                          <div className="my-3 p-3.5 sm:p-4 rounded-xl bg-slate-900 border border-emerald-500/40 shadow-xl font-sans">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shrink-0">
+                                  <Icon name="check-circle-2" size={20} />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-emerald-400 uppercase">
+                                      {t.mockup.patchVerified}
+                                    </span>
+                                    <span className="text-xs text-slate-400 font-mono">{t.mockup.testsGenerated}</span>
+                                  </div>
+                                  <p className="text-xs text-slate-300">
+                                    {t.mockup.patchDesc}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={handleResetFix}
+                                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1.5 transition-colors"
+                                >
+                                  <Icon name="rotate-ccw" size={14} />
+                                  <span>{t.mockup.resetBtn}</span>
+                                </button>
+                                <span className="px-3 py-1.5 rounded-lg bg-emerald-600/20 border border-emerald-500/30 text-emerald-300 text-xs font-semibold">
+                                  {t.mockup.prApproved}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-start gap-3 text-slate-400 py-0.5">
+                            <span className="w-8 text-right text-slate-600 select-none">47</span>
+                            <span className="text-purple-400">return</span> <span className="text-slate-200">payload.get("sub")</span>
+                          </div>
+                        </div>
+                      )}
+
+                    </div>
+                  ) : (
+                    /* AST Taint Flow View */
+                    <div className="py-6 px-2 flex flex-col items-center justify-center font-sans">
+                      <div className="w-full max-w-xl bg-slate-900 p-6 rounded-xl border border-white/10 text-center">
+                        <div className="text-cyan-400 mb-3 flex justify-center">
+                          <Icon name="activity" size={32} />
+                        </div>
+                        <h4 className="text-base font-semibold text-white mb-2">{t.mockup.astTitle}</h4>
+                        <p className="text-xs text-slate-400 mb-6">
+                          {t.mockup.astSubtitle}
+                        </p>
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono">
+                          <div className="p-3 rounded-lg bg-slate-950 border border-slate-700 w-full sm:w-auto">
+                            <span className="text-rose-400 block font-bold">SOURCE</span>
+                            <span className="text-slate-300">{t.mockup.astSource}</span>
+                          </div>
+                          <Icon name="arrow-right" size={16} className="text-slate-500 hidden sm:block" />
+                          <div className="p-3 rounded-lg bg-slate-950 border border-indigo-500/40 w-full sm:w-auto">
+                            <span className="text-indigo-400 block font-bold">TAINT ANALYSIS</span>
+                            <span className="text-slate-300">{t.mockup.astTaint}</span>
+                          </div>
+                          <Icon name="arrow-right" size={16} className="text-slate-500 hidden sm:block" />
+                          <div className="p-3 rounded-lg bg-slate-950 border border-emerald-500/40 w-full sm:w-auto">
+                            <span className="text-emerald-400 block font-bold">PATCH SINK</span>
+                            <span className="text-slate-300">{t.mockup.astSink}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer bar */}
+                <div className="px-4 py-2.5 bg-slate-950/90 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+                  <div className="flex items-center gap-4">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                      {t.mockup.ciPipeline} <strong className="text-slate-200">GitHub Actions #10492</strong>
+                    </span>
+                    <span className="hidden sm:inline">•</span>
+                    <span className="hidden sm:inline">{t.mockup.scanSpeed} <span className="text-cyan-400 font-semibold font-mono">2.8s</span></span>
+                  </div>
+                  <div>
+                    <span className="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 text-[11px] font-semibold">
+                      {t.mockup.botAuditActive}
+                    </span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </section>
+      );
+    }
+
+    // --- Trusted By ---
+    function TrustedBy({ t }) {
+      const brands = [
+        { name: 'Cloudflare', category: 'Edge Infrastructure' },
+        { name: 'Supabase', category: 'Open Source Backend' },
+        { name: 'GitKraken', category: 'Developer Tools' },
+        { name: 'Datadog', category: 'Observability' },
+        { name: 'Vercel', category: 'Frontend Cloud' },
+        { name: 'Postman', category: 'API Platform' },
+      ];
+
+      return (
+        <section className="py-12 border-y border-white/5 bg-slate-950/40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p className="text-center text-xs font-semibold uppercase tracking-wider text-slate-400 mb-8">
+              {t.headline}
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6 items-center justify-items-center">
+              {brands.map((brand) => (
+                <div key={brand.name} className="flex flex-col items-center justify-center p-3 group cursor-default">
+                  <div className="text-lg sm:text-xl font-bold tracking-tight text-slate-400 group-hover:text-white transition-colors">
+                    {brand.name}
+                  </div>
+                  <span className="text-[10px] text-slate-400 group-hover:text-cyan-400/80 transition-colors">
+                    {brand.category}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-8 flex justify-center">
+              <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-slate-900/80 border border-white/5 text-xs text-slate-300">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>{t.metricText}</span>
+                <span className="text-slate-600 hidden sm:inline">•</span>
+                <span className="text-indigo-400 font-semibold hidden sm:inline">{t.zeroBreaches}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // --- Bento Grid ---
+    function BentoGrid({ t }) {
+      const [copied, setCopied] = useState(false);
+      const [selectedCompliance, setSelectedCompliance] = useState('owasp');
+      const [activeAstNode, setActiveAstNode] = useState(1);
+
+      const handleCopy = () => {
+        navigator.clipboard?.writeText('npx codepulse init --repo acme/backend');
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      };
+
+      const astNodes = t.card1.nodes;
+      const complianceStandards = t.card4.standards;
+
+      return (
+        <section id="bento" className="py-24 relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-semibold uppercase tracking-wider mb-4">
+                <Icon name="sparkles" size={14} />
+                {t.badge}
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight mb-4">
+                {t.title}
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-300 to-cyan-300">
+                  {t.titleGradient}
+                </span>
+              </h2>
+              <p className="text-base sm:text-lg text-slate-400">
+                {t.subtitle}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+              {/* CARD 1 (Span 2) */}
+              <div className="md:col-span-2 rounded-3xl bg-slate-900/70 border border-white/10 p-6 sm:p-8 backdrop-blur-xl relative overflow-hidden shadow-xl hover:border-indigo-500/40 transition-all flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between gap-4 mb-4">
+                    <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+                      <Icon name="workflow" size={24} />
+                    </div>
+                    <span className="text-xs font-mono px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                      {t.card1.tag}
+                    </span>
+                  </div>
+
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
+                    {t.card1.title}
+                  </h3>
+                  <p className="text-sm text-slate-400 leading-relaxed mb-6">
+                    {t.card1.desc}
+                  </p>
+
+                  <div className="bg-slate-950/80 rounded-2xl p-4 border border-white/5 font-sans mb-4">
+                    <div className="flex items-center justify-between mb-3 text-xs text-slate-400">
+                      <span className="font-mono text-cyan-400 font-semibold flex items-center gap-1.5">
+                        <Icon name="binary" size={14} />
+                        {t.card1.interactiveTitle}
+                      </span>
+                      <span>{t.card1.clickHint}</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      {astNodes.map((node) => (
+                        <button
+                          key={node.id}
+                          onClick={() => setActiveAstNode(node.id)}
+                          className={`text-left p-3 rounded-xl border transition-all text-xs ${
+                            activeAstNode === node.id
+                              ? 'bg-indigo-950/80 border-indigo-500 text-white shadow-lg'
+                              : 'bg-slate-900/60 border-white/5 text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-white/5 text-indigo-300">
+                              {node.type}
+                            </span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                          </div>
+                          <div className="font-semibold text-slate-200 truncate">{node.title}</div>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="mt-3.5 p-3 rounded-xl bg-slate-900/90 border border-white/5 text-xs flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                        <span className="text-slate-300">
+                          {astNodes.find(n => n.id === activeAstNode)?.desc}
+                        </span>
+                      </div>
+                      <span className="font-mono text-[11px] text-emerald-400 font-semibold shrink-0">
+                        {t.card1.sanitizedBadge}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 text-xs text-slate-400 pt-2 border-t border-white/5">
+                  {t.card1.footer.map((tag) => (
+                    <span key={tag}>{tag}</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* CARD 2 (Span 1) */}
+              <div className="md:col-span-1 rounded-3xl bg-slate-900/70 border border-white/10 p-6 sm:p-8 backdrop-blur-xl relative overflow-hidden shadow-xl hover:border-cyan-500/40 transition-all flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+                      <Icon name="shield-check" size={24} />
+                    </div>
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                      {t.card2.badge}
+                    </span>
+                  </div>
+
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    {t.card2.title}
+                  </h3>
+                  <p className="text-sm text-slate-400 leading-relaxed mb-6">
+                    {t.card2.desc}
+                  </p>
+
+                  <div className="p-4 rounded-2xl bg-slate-950/80 border border-white/5 flex flex-col items-center justify-center text-center">
+                    <div className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400 font-mono mb-1">
+                      99.9%
+                    </div>
+                    <div className="text-xs font-semibold text-slate-300">{t.card2.accuracyLabel}</div>
+                    <div className="text-[11px] text-slate-400">{t.card2.accuracySub}</div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs text-slate-400">
+                  <span>{t.card2.footerLeft}</span>
+                  <span className="text-emerald-400 font-semibold font-mono">{t.card2.footerRight}</span>
+                </div>
+              </div>
+
+              {/* CARD 3 (Span 1) */}
+              <div className="md:col-span-1 rounded-3xl bg-slate-900/70 border border-white/10 p-6 sm:p-8 backdrop-blur-xl relative overflow-hidden shadow-xl hover:border-purple-500/40 transition-all flex flex-col justify-between">
+                <div>
+                  <div className="p-3 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 w-fit mb-4">
+                    <Icon name="sparkles" size={24} />
+                  </div>
+
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    {t.card3.title}
+                  </h3>
+                  <p className="text-sm text-slate-400 leading-relaxed mb-6">
+                    {t.card3.desc}
+                  </p>
+
+                  <div className="bg-slate-950/90 rounded-2xl p-3.5 border border-white/5 font-mono text-xs">
+                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-slate-400 text-[11px]">
+                      <span>bot/patch-412.patch</span>
+                      <span className="text-emerald-400 font-bold">{t.card3.patchStatus}</span>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-rose-400 bg-rose-950/30 px-2 py-0.5 rounded truncate">
+                        - cursor.execute(f"SELECT * ... {'{id}'}")
+                      </div>
+                      <div className="text-emerald-400 bg-emerald-950/30 px-2 py-0.5 rounded truncate">
+                        + cursor.execute("SELECT * ... %s", (id,))
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-white/5 text-xs text-slate-400 flex items-center justify-between">
+                  <span>{t.card3.footerLeft}</span>
+                  <span className="text-purple-300 font-semibold font-mono">{t.card3.footerRight}</span>
+                </div>
+              </div>
+
+              {/* CARD 4 (Span 2) */}
+              <div className="md:col-span-2 rounded-3xl bg-slate-900/70 border border-white/10 p-6 sm:p-8 backdrop-blur-xl relative overflow-hidden shadow-xl hover:border-emerald-500/40 transition-all flex flex-col justify-between">
+                <div>
+                  <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                      <Icon name="lock" size={24} />
+                    </div>
+
+                    <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-white/10 text-xs">
+                      {['owasp', 'soc2', 'pci'].map((std) => (
+                        <button
+                          key={std}
+                          onClick={() => setSelectedCompliance(std)}
+                          className={`px-3 py-1 rounded-lg font-medium uppercase ${selectedCompliance === std ? 'bg-emerald-600 text-white' : 'text-slate-400'}`}
+                        >
+                          {std}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
+                    {t.card4.title}
+                  </h3>
+                  <p className="text-sm text-slate-400 leading-relaxed mb-6">
+                    {t.card4.desc}
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                    {complianceStandards[selectedCompliance]?.map((item) => (
+                      <div key={item.id} className="p-3 rounded-xl bg-slate-950/70 border border-white/5 flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2.5 truncate">
+                          <span className="font-mono font-bold text-emerald-400">{item.id}</span>
+                          <span className="text-slate-300 truncate">{item.name}</span>
+                        </div>
+                        <span className="text-[11px] font-semibold text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded">
+                          {item.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-3 border-t border-white/5 text-xs text-slate-400">
+                  <span className="flex items-center gap-2">
+                    <Icon name="file-check" size={16} className="text-emerald-400" />
+                    {t.card4.footerLeft}
+                  </span>
+                  <span className="text-emerald-400 font-semibold font-mono">{t.card4.footerRight}</span>
+                </div>
+              </div>
+
+              {/* CARD 5 (Span 3) */}
+              <div className="md:col-span-3 rounded-3xl bg-slate-900/70 border border-white/10 p-6 sm:p-8 backdrop-blur-xl relative overflow-hidden shadow-xl hover:border-indigo-500/30 transition-all">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                  <div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-4">
+                      <Icon name="zap" size={14} />
+                      {t.card5.badge}
+                    </div>
+                    <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+                      {t.card5.title}
+                    </h3>
+                    <p className="text-sm text-slate-300 leading-relaxed mb-6">
+                      {t.card5.desc}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2.5 text-xs text-slate-300 font-medium">
+                      {['GitHub Actions', 'GitLab CI', 'Bitbucket', 'VS Code', 'JetBrains', 'Slack Notifications', 'Jira Sync'].map((eco) => (
+                        <span key={eco} className="px-3 py-1.5 rounded-xl bg-slate-950 border border-white/10">
+                          {eco}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl bg-slate-950 border border-white/10 overflow-hidden font-mono text-xs shadow-2xl">
+                    <div className="px-4 py-2.5 bg-slate-900/90 border-b border-white/10 flex items-center justify-between text-slate-400">
+                      <div className="flex items-center gap-2">
+                        <Icon name="terminal" size={16} className="text-indigo-400" />
+                        <span>terminal ~ quickstart</span>
+                      </div>
+                      <button onClick={handleCopy} className="flex items-center gap-1.5 text-[11px] text-slate-300 hover:text-white">
+                        <Icon name={copied ? 'check' : 'copy'} size={14} className={copied ? 'text-emerald-400' : ''} />
+                        <span>{copied ? t.card5.copiedBtn : t.card5.copyBtn}</span>
+                      </button>
+                    </div>
+                    <div className="p-4 sm:p-5 space-y-2 text-slate-300">
+                      <div className="text-slate-400 font-semibold">
+                        <span className="text-indigo-400">$</span> {t.card5.terminalLogs[0]}
+                      </div>
+                      <div className="text-cyan-400">
+                        {t.card5.terminalLogs[1]}
+                      </div>
+                      <div className="text-slate-400">
+                        {t.card5.terminalLogs[2]}
+                      </div>
+                      <div className="text-slate-400">
+                        {t.card5.terminalLogs[3]}
+                      </div>
+                      <div className="text-emerald-400 font-semibold pt-1">
+                        {t.card5.terminalLogs[4]}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // --- How It Works ---
+    function HowItWorks({ t }) {
+      const [activeStep, setActiveStep] = useState(0);
+
+      return (
+        <section id="how-it-works" className="py-24 bg-slate-950/60 border-t border-white/5 relative">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-4">
+                {t.badge}
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-4">
+                {t.title}
+              </h2>
+              <p className="text-slate-400 text-base sm:text-lg">
+                {t.subtitle}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
+              {t.steps.map((step, idx) => (
+                <button
+                  key={step.number}
+                  onClick={() => setActiveStep(idx)}
+                  className={`p-4 rounded-2xl border text-left transition-all ${activeStep === idx ? 'bg-slate-900 border-indigo-500 shadow-xl' : 'bg-slate-950/40 border-white/5 text-slate-400 hover:text-white'}`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span className={`text-xs font-mono font-bold ${activeStep === idx ? 'text-indigo-400' : 'text-slate-400'}`}>{step.number}</span>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">{step.tag}</span>
+                  </div>
+                  <div className="text-sm font-semibold text-white truncate">{step.title}</div>
+                </button>
+              ))}
+            </div>
+
+            <div className="p-6 sm:p-10 rounded-3xl bg-slate-900/80 border border-white/10 backdrop-blur-2xl shadow-2xl">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div className="lg:col-span-7 space-y-4">
+                  <div className="text-xs font-mono text-cyan-400 font-semibold uppercase">
+                    STEP {t.steps[activeStep].number} • {t.steps[activeStep].tag}
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-white">
+                    {t.steps[activeStep].heading}
+                  </h3>
+                  <p className="text-base text-slate-300 leading-relaxed font-normal">
+                    {t.steps[activeStep].description}
+                  </p>
+                  <div className="pt-2 space-y-2">
+                    {t.steps[activeStep].items.map((it, i) => (
+                      <div key={i} className="flex items-center gap-2.5 text-xs text-slate-300">
+                        <Icon name="check-circle-2" size={14} className="text-emerald-400" />
+                        <span>{it}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="lg:col-span-5">
+                  <div className="p-6 rounded-2xl bg-slate-950 border border-white/10 font-mono text-xs shadow-xl">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+                      <span className="text-slate-400">CodePulse Orchestrator</span>
+                      <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[11px]">{t.steps[activeStep].badge}</span>
+                    </div>
+                    <div className="text-slate-300 space-y-2">
+                      <div className="text-cyan-400">✓ Step {t.steps[activeStep].number} active</div>
+                      <div className="text-slate-400">Zero latency background worker</div>
+                      <div className="text-emerald-400">Security Gate Status: PASSED</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // --- Pricing ---
+    function Pricing({ t, onOpenAuth }) {
+      const [isAnnual, setIsAnnual] = useState(true);
+
+      const tiers = [
+        {
+          data: t.developer,
+          popular: false,
+        },
+        {
+          data: t.pro,
+          popular: true,
+        },
+        {
+          data: t.enterprise,
+          popular: false,
+        }
+      ];
+
+      return (
+        <section id="pricing" className="py-24 relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto mb-12">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-4">
+                {t.badge}
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-4">
+                {t.title}
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-300">
+                  {t.titleGradient}
+                </span>
+              </h2>
+              <p className="text-slate-400 text-base sm:text-lg mb-8">
+                {t.subtitle}
+              </p>
+
+              {/* Toggle */}
+              <div className="flex items-center justify-center gap-4">
+                <span className={`text-sm font-medium ${!isAnnual ? 'text-white font-semibold' : 'text-slate-400'}`}>
+                  {t.monthly}
+                </span>
+                <button
+                  onClick={() => setIsAnnual(!isAnnual)}
+                  className="relative w-14 h-8 rounded-full bg-slate-800 p-1 border border-white/10 transition-colors"
+                >
+                  <div className={`w-6 h-6 rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400 transition-transform ${isAnnual ? 'translate-x-6' : 'translate-x-0'}`} />
+                </button>
+                <span className={`text-sm font-medium flex items-center gap-1.5 ${isAnnual ? 'text-white font-semibold' : 'text-slate-400'}`}>
+                  {t.yearly}
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    {t.discountBadge}
+                  </span>
+                </span>
+              </div>
+            </div>
+
+            {/* Cards */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+              {tiers.map((item) => {
+                const tier = item.data;
+                const isPop = item.popular;
+                return (
+                  <div
+                    key={tier.name}
+                    className={`relative rounded-3xl p-8 flex flex-col justify-between transition-all backdrop-blur-xl ${
+                      isPop
+                        ? 'bg-gradient-to-b from-slate-900/90 to-slate-950/90 border-2 border-indigo-500/60 shadow-2xl shadow-indigo-950/60 ring-1 ring-indigo-400/30'
+                        : 'bg-slate-900/60 border border-white/10'
+                    }`}
+                  >
+                    {isPop && (
+                      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 text-white text-xs font-bold shadow-lg">
+                        {tier.badge}
+                      </div>
+                    )}
+
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-xl font-bold text-white">{tier.name}</h3>
+                        {!isPop && (
+                          <span className="text-xs font-mono text-slate-400 bg-slate-800 px-2.5 py-0.5 rounded-full">
+                            {tier.badge}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-400 min-h-[36px] mb-6">{tier.desc}</p>
+
+                      <div className="mb-6 pb-6 border-b border-white/10">
+                        {typeof tier.priceMonthly === 'number' ? (
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
+                              ${isAnnual ? tier.priceAnnual : tier.priceMonthly}
+                            </span>
+                            <span className="text-sm text-slate-400">
+                              {tier.priceMonthly === 0 ? '' : '/ dev / mo'}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                            {tier.priceMonthly}
+                          </div>
+                        )}
+                      </div>
+
+                      <ul className="space-y-3 mb-8">
+                        {tier.features.map((f, i) => (
+                          <li key={i} className="flex items-start gap-3 text-xs sm:text-sm text-slate-300">
+                            <div className="p-0.5 rounded-full bg-emerald-500/20 text-emerald-400 shrink-0 mt-0.5">
+                              <Icon name="check" size={14} />
+                            </div>
+                            <span>{f}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <button
+                      onClick={onOpenAuth}
+                      className={`w-full py-3.5 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all ${
+                        isPop
+                          ? 'bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-500 hover:from-indigo-400 hover:to-cyan-400 text-white shadow-xl shadow-indigo-500/30'
+                          : 'bg-slate-800 hover:bg-slate-700 text-white border border-white/10'
+                      }`}
+                    >
+                      <span>{tier.cta}</span>
+                      <Icon name="arrow-right" size={16} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // --- FAQ ---
+    function FAQ({ t, onOpenContact }) {
+      const [openIdx, setOpenIdx] = useState(0);
+
+      return (
+        <section id="faq" className="py-24 bg-slate-950/80 border-t border-white/5 relative">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-semibold uppercase tracking-wider mb-4">
+                <Icon name="help-circle" size={14} />
+                {t.badge}
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-4">
+                {t.title}
+              </h2>
+            </div>
+
+            <div className="space-y-3.5">
+              {t.items.map((f, i) => {
+                const isOpen = openIdx === i;
+                return (
+                  <div key={i} className="rounded-2xl bg-slate-900/60 border border-white/10 overflow-hidden">
+                    <button
+                      onClick={() => setOpenIdx(isOpen ? -1 : i)}
+                      className="w-full px-6 py-5 text-left flex items-center justify-between gap-4"
+                    >
+                      <span className="text-base sm:text-lg font-semibold text-white">{f.q}</span>
+                      <Icon name="chevron-down" size={18} className={`transition-transform duration-300 ${isOpen ? 'rotate-180 text-indigo-400' : 'text-slate-400'}`} />
+                    </button>
+                    {isOpen && (
+                      <div className="px-6 pb-6 pt-1 text-sm sm:text-base text-slate-300 leading-relaxed border-t border-white/5">
+                        {f.a}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-12 text-center text-sm text-slate-400">
+              <button onClick={onOpenContact} className="text-cyan-400 hover:text-cyan-300 underline underline-offset-4 font-semibold">
+                {t.speakToArchitect}
+              </button>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // --- Final CTA ---
+    function CTA({ t, onOpenAuth }) {
+      const [email, setEmail] = useState('');
+      const [sent, setSent] = useState(false);
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        if (email) setSent(true);
+      };
+
+      return (
+        <section className="py-24 relative overflow-hidden">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="relative rounded-3xl p-8 sm:p-14 lg:p-16 bg-gradient-to-b from-slate-900/90 to-slate-950/95 border border-white/15 shadow-2xl backdrop-blur-2xl text-center">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-semibold mb-6">
+                <Icon name="sparkles" size={14} className="text-cyan-300" />
+                <span>{t.badge}</span>
+              </div>
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight mb-6 max-w-4xl mx-auto">
+                {t.title}
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-300 to-cyan-300">
+                  {t.titleGradient}
+                </span>
+              </h2>
+              <p className="text-slate-300 text-base sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed font-normal">
+                {t.subtitle}
+              </p>
+
+              <div className="max-w-xl mx-auto mb-8">
+                {!sent ? (
+                  <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-center gap-2 p-1.5 bg-slate-950/90 border border-white/15 rounded-2xl shadow-2xl">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      placeholder={t.emailPlaceholder}
+                      className="w-full px-4 py-3 bg-transparent text-sm text-white placeholder-slate-400 focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      className="w-full sm:w-auto whitespace-nowrap px-7 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-400 hover:to-cyan-400 text-white text-sm font-semibold shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2"
+                    >
+                      <span>{t.submitBtn}</span>
+                      <Icon name="arrow-right" size={16} />
+                    </button>
+                  </form>
+                ) : (
+                  <div className="p-4 rounded-xl bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 text-sm flex items-center justify-center gap-2 font-medium">
+                    <Icon name="check-circle-2" size={18} className="text-emerald-400" />
+                    <span>{t.successMsg}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-6 text-xs sm:text-sm text-slate-400">
+                <span className="flex items-center gap-1.5">
+                  <Icon name="lock" size={16} className="text-indigo-400" />
+                  {t.zeroRetention}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Icon name="shield-check" size={16} className="text-emerald-400" />
+                  {t.soc2}
+                </span>
+                <span>{t.reviews}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // --- Footer ---
+    function Footer({ t, onOpenContact }) {
+      return (
+        <footer className="bg-slate-950 border-t border-white/10 pt-16 pb-12 font-sans">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-12 border-b border-white/5">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-cyan-400 p-[1px]">
+                  <div className="w-full h-full bg-slate-950 rounded-[11px] flex items-center justify-center text-indigo-400">
+                    <Icon name="shield-check" size={18} />
+                  </div>
+                </div>
+                <span className="text-xl font-bold tracking-tight text-white">
+                  Code<span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-300">Pulse</span>
+                </span>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-slate-900 border border-white/5 text-xs text-slate-300">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>{t.statusNormal} ({t.uptime})</span>
+                </div>
+                <button
+                  onClick={onOpenContact}
+                  className="px-3 py-1 rounded-full bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 hover:text-white text-xs font-medium"
+                >
+                  Contact
+                </button>
+              </div>
+            </div>
+            <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+              <div>© 2026 {t.copyright}</div>
+              <div className="flex items-center gap-6">
+                <a href="#bento" className="hover:text-white">{t.privacy}</a>
+                <a href="#pricing" className="hover:text-white">{t.terms}</a>
+                <a href="#faq" className="hover:text-white">{t.hallOfFame}</a>
+              </div>
+            </div>
+          </div>
+        </footer>
+      );
+    }
+
+    // --- Contact Modal (with Personal Data Processing Consent Checkbox) ---
+    function ContactModal({ isOpen, onClose, t }) {
+      const [name, setName] = useState('');
+      const [email, setEmail] = useState('');
+      const [subject, setSubject] = useState('');
+      const [message, setMessage] = useState('');
+      const [consent, setConsent] = useState(false);
+      const [error, setError] = useState('');
+      const [isSending, setIsSending] = useState(false);
+      const [isSuccess, setIsSuccess] = useState(false);
+
+      if (!isOpen) return null;
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!consent) {
+          setError('Please consent to personal data processing');
+          return;
+        }
+        setError('');
+        setIsSending(true);
+        setTimeout(() => {
+          setIsSending(false);
+          setIsSuccess(true);
+        }, 800);
+      };
+
+      const handleClose = () => {
+        setIsSuccess(false);
+        setError('');
+        onClose();
+      };
+
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div onClick={handleClose} className="fixed inset-0 bg-slate-950/80 backdrop-blur-md" />
+          <div className="relative w-full max-w-lg rounded-3xl bg-slate-900 border border-white/10 p-6 sm:p-8 shadow-2xl backdrop-blur-2xl z-10 my-8 overflow-hidden font-sans">
+            <button
+              onClick={handleClose}
+              className="absolute top-5 right-5 p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white border border-white/5"
+            >
+              <Icon name="x" size={18} />
+            </button>
+
+            {!isSuccess ? (
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+                    <Icon name="mail" size={20} />
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                    {t.title}
+                  </h3>
+                </div>
+                <p className="text-xs sm:text-sm text-slate-400 mb-6 leading-relaxed">
+                  {t.subtitle}
+                </p>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1 font-mono">
+                      {t.nameLabel} <span className="text-rose-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder={t.namePlaceholder}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950/80 border border-white/10 text-white text-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1 font-mono">
+                      {t.emailLabel} <span className="text-rose-400">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder={t.emailPlaceholder}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950/80 border border-white/10 text-white text-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1 font-mono">
+                      {t.subjectLabel}
+                    </label>
+                    <select
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/80 border border-white/10 text-white text-sm focus:outline-none focus:border-indigo-500"
+                    >
+                      <option value="" disabled>{t.subjectPlaceholder}</option>
+                      {t.subjects?.map((s) => (
+                        <option key={s} value={s} className="bg-slate-900 text-white">{s}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1 font-mono">
+                      {t.messageLabel} <span className="text-rose-400">*</span>
+                    </label>
+                    <textarea
+                      required
+                      rows={3}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder={t.messagePlaceholder}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/80 border border-white/10 text-white text-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 resize-none"
+                    />
+                  </div>
+
+                  {/* CONSENT CHECKBOX (DATA PROCESSING) */}
+                  <div className="pt-1">
+                    <label className="flex items-start gap-3 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={consent}
+                        onChange={(e) => setConsent(e.target.checked)}
+                        className="mt-1 w-4 h-4 rounded border-slate-700 bg-slate-950 text-indigo-500 accent-indigo-500 cursor-pointer"
+                      />
+                      <span className="text-xs text-slate-300 leading-normal">
+                        {t.consentText}
+                        <a href="#" className="text-indigo-400 underline">{t.consentLink}</a>. <span className="text-rose-400">*</span>
+                      </span>
+                    </label>
+                  </div>
+
+                  {error && (
+                    <div className="p-2.5 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs">
+                      {error}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={isSending}
+                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-400 hover:to-cyan-400 text-white text-sm font-semibold shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2"
+                  >
+                    {isSending ? (
+                      <span>{t.sendingBtn}</span>
+                    ) : (
+                      <>
+                        <Icon name="send" size={16} />
+                        <span>{t.submitBtn}</span>
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <div className="py-8 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
+                  <Icon name="check-circle-2" size={32} />
+                </div>
+                <h4 className="text-2xl font-bold text-white">{t.successTitle}</h4>
+                <p className="text-sm text-slate-300 max-w-sm mx-auto">{t.successDesc}</p>
+                <div className="pt-4">
+                  <button onClick={handleClose} className="px-6 py-2.5 rounded-xl bg-slate-800 text-white text-sm">
+                    {t.closeBtn}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // --- Auth Modal (Triggered by "Start Free" / "Начать бесплатно") ---
+    function AuthModal({ isOpen, onClose, t }) {
+      const [email, setEmail] = useState('');
+      const [password, setPassword] = useState('');
+      const [isSubmitting, setIsSubmitting] = useState(false);
+      const [isSuccess, setIsSuccess] = useState(false);
+
+      if (!isOpen) return null;
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        setTimeout(() => {
+          setIsSubmitting(false);
+          setIsSuccess(true);
+        }, 700);
+      };
+
+      const handleClose = () => {
+        setIsSuccess(false);
+        onClose();
+      };
+
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div onClick={handleClose} className="fixed inset-0 bg-slate-950/80 backdrop-blur-md" />
+          <div className="relative w-full max-w-md rounded-3xl bg-slate-900 border border-white/10 p-6 sm:p-8 shadow-2xl backdrop-blur-2xl z-10 my-8 overflow-hidden font-sans">
+            <button
+              onClick={handleClose}
+              className="absolute top-5 right-5 p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white border border-white/5"
+            >
+              <Icon name="x" size={18} />
+            </button>
+
+            {!isSuccess ? (
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+                    <Icon name="shield-check" size={20} />
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                    {t.title}
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                  {t.subtitle}
+                </p>
+
+                {/* OAuth */}
+                <div className="space-y-2.5 mb-6">
+                  <button
+                    onClick={handleSubmit}
+                    className="w-full py-2.5 px-4 rounded-xl bg-slate-950 hover:bg-slate-800 text-white text-xs font-semibold border border-white/10 flex items-center justify-center gap-2.5"
+                  >
+                    <Icon name="github" size={16} />
+                    <span>{t.githubBtn}</span>
+                  </button>
+                  <button
+                    onClick={handleSubmit}
+                    className="w-full py-2.5 px-4 rounded-xl bg-slate-950 hover:bg-slate-800 text-white text-xs font-semibold border border-white/10 flex items-center justify-center gap-2.5"
+                  >
+                    <Icon name="git-pull-request" size={16} className="text-amber-400" />
+                    <span>{t.gitlabBtn}</span>
+                  </button>
+                  <button
+                    onClick={handleSubmit}
+                    className="w-full py-2.5 px-4 rounded-xl bg-slate-950 hover:bg-slate-800 text-white text-xs font-semibold border border-white/10 flex items-center justify-center gap-2.5"
+                  >
+                    <Icon name="globe" size={16} className="text-blue-400" />
+                    <span>{t.googleBtn}</span>
+                  </button>
+                </div>
+
+                <div className="relative flex items-center justify-center mb-6">
+                  <div className="border-t border-white/10 w-full" />
+                  <span className="bg-slate-900 px-3 text-[11px] text-slate-400 font-mono uppercase whitespace-nowrap">
+                    {t.orEmail}
+                  </span>
+                </div>
+
+                {/* Email Form */}
+                <form onSubmit={handleSubmit} className="space-y-3.5">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1 font-mono">
+                      {t.emailLabel}
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder={t.emailPlaceholder}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-white text-xs placeholder-slate-400 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 font-mono">
+                        {t.passwordLabel}
+                      </label>
+                      <a href="#" className="text-[11px] text-indigo-400">{t.forgotPassword}</a>
+                    </div>
+                    <input
+                      type="password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder={t.passwordPlaceholder}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-white text-xs placeholder-slate-400 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full mt-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-400 hover:to-cyan-400 text-white text-xs font-semibold shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2"
+                  >
+                    {isSubmitting ? (
+                      <span>Loading...</span>
+                    ) : (
+                      <>
+                        <span>{t.submitBtn}</span>
+                        <Icon name="arrow-right" size={14} />
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                <div className="mt-4 pt-4 border-t border-white/5 text-[10px] text-slate-400 text-center">
+                  {t.termsNote}
+                </div>
+              </div>
+            ) : (
+              <div className="py-8 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
+                  <Icon name="check-circle-2" size={32} />
+                </div>
+                <h4 className="text-2xl font-bold text-white">Welcome to CodePulse!</h4>
+                <p className="text-xs text-slate-300 max-w-xs mx-auto">
+                  Account created. 14 days of Pro trial activated.
+                </p>
+                <button
+                  onClick={handleClose}
+                  className="px-6 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-500 text-white text-xs font-semibold shadow-lg"
+                >
+                  Go to Dashboard →
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // --- Main App Component ---
+    function App() {
+      // Default to 'en' (English) as requested
+      const [lang, setLang] = useState('en');
+      const [isContactOpen, setIsContactOpen] = useState(false);
+      const [isAuthOpen, setIsAuthOpen] = useState(false);
+
+      const t = translations[lang] || translations.en;
+
+      useEffect(() => {
+        if (window.lucide) {
+          window.lucide.createIcons();
+        }
+      });
+
+      return (
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+          <Navbar 
+            lang={lang} 
+            setLang={setLang} 
+            t={t}
+            onOpenContact={() => setIsContactOpen(true)}
+            onOpenAuth={() => setIsAuthOpen(true)}
+          />
+
+          <main className="flex-1">
+            <Hero 
+              t={t.hero} 
+              onOpenAuth={() => setIsAuthOpen(true)} 
+            />
+            <TrustedBy 
+              t={t.trustedBy} 
+            />
+            <BentoGrid 
+              t={t.bento} 
+            />
+            <HowItWorks 
+              t={t.howItWorks} 
+            />
+            <Pricing 
+              t={t.pricing} 
+              onOpenAuth={() => setIsAuthOpen(true)} 
+            />
+            <FAQ 
+              t={t.faq} 
+              onOpenContact={() => setIsContactOpen(true)} 
+            />
+            <CTA 
+              t={t.cta} 
+              onOpenAuth={() => setIsAuthOpen(true)} 
+            />
+          </main>
+
+          <Footer 
+            t={t.footer} 
+            onOpenContact={() => setIsContactOpen(true)} 
+          />
+
+          {/* Contact Modal */}
+          <ContactModal 
+            isOpen={isContactOpen} 
+            onClose={() => setIsContactOpen(false)} 
+            t={t.contactModal} 
+          />
+
+          {/* Auth Modal */}
+          <AuthModal 
+            isOpen={isAuthOpen} 
+            onClose={() => setIsAuthOpen(false)} 
+            t={t.authModal} 
+          />
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
